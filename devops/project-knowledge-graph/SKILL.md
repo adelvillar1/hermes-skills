@@ -257,6 +257,17 @@ Since the project-knowledge-graph SKILL.md is in `~/.hermes/skills/`, it gets in
 
 Indexed content persists in the Docker volume until explicitly removed. This means cross-project knowledge is available across sessions without re-indexing, but stale or sensitive content remains searchable until purged.
 
+**Important: the indexer uses MERGE (upsert), not sync.** When a source file is modified, its chunks are re-indexed on the next `knowledge index` run. However, if a file is **deleted** or a chunk is **removed**, the old chunks remain in FalkorDB until the volume is purged. The indexer does not track deletions — it only adds and updates.
+
+If you need to guarantee no stale content remains after removing source files:
+
+```bash
+# Full purge and rebuild
+docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data
+docker run -d --restart=unless-stopped -p 127.0.0.1:16379:6379 -v knowledge-graph-data:/data --name knowledge-graph falkordb/falkordb:latest
+python3 ~/.hermes/scripts/project-knowledge-index.py index
+```
+
 ### Stop the service (keep data)
 
 ```bash
