@@ -88,7 +88,7 @@ def get_falkordb():
         print(f"❌ Cannot connect to FalkorDB at {FALKORDB_HOST}:{FALKORDB_PORT}", file=sys.stderr)
         print(f"   Error: {e}", file=sys.stderr)
         print(f"   Start the container:", file=sys.stderr)
-        print(f"   docker run -d --restart=always -p {FALKORDB_PORT}:6379 --name knowledge-graph falkordb/falkordb", file=sys.stderr)
+        print(f"   docker run -d --restart=unless-stopped -p 127.0.0.1:{FALKORDB_PORT}:6379 -v knowledge-graph-data:/data --name knowledge-graph falkordb/falkordb:latest", file=sys.stderr)
         sys.exit(1)
 
 def ensure_graph(db):
