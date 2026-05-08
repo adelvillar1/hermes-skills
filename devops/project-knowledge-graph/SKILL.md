@@ -24,7 +24,8 @@ security:
     - "Indexing is content-hash-gated: unchanged documents skip MERGE"
     - "Glob patterns explicitly exclude node_modules, .next, .git, venv"
     - "Full purge: docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data"
-    - "Docker image: falkordb/falkordb:latest (no versioned tags available from publisher)"
+    - "Port bound to 127.0.0.1 (localhost only) — not reachable from other machines"
+    - "Docker image: falkordb/falkordb:latest (digest-pinning instructions included in setup)"
     - "Python package pinned: falkordb==1.6.1"
 triggers:
   - "knowledge.*graph"
@@ -81,11 +82,21 @@ Ranked results with project, file, heading, snippet
 ```bash
 docker run -d \
   --restart=unless-stopped \
-  -p 16379:6379 \
+  -p 127.0.0.1:16379:6379 \
   -v knowledge-graph-data:/data \
   --name knowledge-graph \
   falkordb/falkordb:latest
 ```
+
+> **🔒 Security:** The port is bound to `127.0.0.1` (localhost only) — FalkorDB is not reachable from other machines on your network. No authentication is configured because the service is only accessible to local processes.
+>
+> **📦 Docker image note:** `falkordb/falkordb:latest` is a mutable tag. To pin by digest (recommended for production), replace the tag with the current SHA256 after pulling:
+> ```bash
+> docker pull falkordb/falkordb:latest
+> DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' falkordb/falkordb:latest)
+> echo "Replace :latest with @${DIGEST#*@}"
+> ```
+> Then use `falkordb/falkordb@sha256:...` in the `docker run` command. Check for updates intentionally rather than relying on automatic pulls.
 
 Auto-starts on Docker daemon start via `--restart=unless-stopped`. Data persists in the Docker volume.
 
@@ -187,7 +198,7 @@ python3 ~/.hermes/scripts/project-knowledge-index.py query "soft delete" --proje
 | Primary filter | Simhash distance (fuzzy) | Cypher CONTAINS (exact match) |
 | Cross-project query | Manual JOINs | `MATCH (c:Chunk {project:'CI'}) RETURN c` |
 | Data model flexibility | Fixed SQL schema | Add node types, edges on the fly |
-| Infrastructure | File on disk | Single Docker container, always running |
+| Infrastructure | File on disk | Single Docker container (localhost-only, 200MB idle) |
 | Query speed | Sub-second | Sub-second |
 
 The Docker container is a one-time setup. After that, it starts on boot automatically (`--restart=always`) and uses <200MB RAM when idle.
@@ -268,7 +279,7 @@ The indexer uses content hashing — unchanged documents are skipped automatical
 ```bash
 # Option A: Clear and re-index
 docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data
-docker run -d --restart=unless-stopped -p 16379:6379 -v knowledge-graph-data:/data --name knowledge-graph falkordb/falkordb:latest
+docker run -d --restart=unless-stopped -p 127.0.0.1:16379:6379 -v knowledge-graph-data:/data --name knowledge-graph falkordb/falkordb:latest
 python3 ~/.hermes/scripts/project-knowledge-index.py index
 
 # Option B: Just re-index (updates changed files, retains unchanged)
