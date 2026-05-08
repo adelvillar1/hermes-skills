@@ -520,5 +520,5 @@ project/
   live sources instead of trusting snapshot files
 - `references/project-scaffold.md` — complete instructions for
   init-project-structure and slim-claude-md workflows
-- `templates/plan.md.template` — markdown template for feature plans
-- `templates/recap.md.template` — markdown template for session recaps
+- `templates/plan.md` — markdown template for feature plans
+- `templates/recap.md` — markdown template for session recaps
