@@ -2,7 +2,7 @@
 """
 Project Knowledge Graph — indexer + query CLI.
 
-Indexes project artifacts (recaps, plans, CLAUDE.md, architecture docs, skills)
+Indexes project artifacts (recaps, plans, project memory files, architecture docs, skills)
 into a local FalkorDB graph. Query by concept across projects.
 
 Usage:
