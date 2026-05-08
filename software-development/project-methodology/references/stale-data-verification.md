@@ -8,32 +8,32 @@ Static snapshot files (`docs/STATE-SNAPSHOT.md`, dated entity counts in plans, e
 
 ## The Pattern
 
-1. **Identify the data point** — is it a live count (active itineraries, ships, etc.) or a static note?
-2. **If live, query the source** — run a DB query, curl an API endpoint, or check the running service
+1. **Identify the data point** — is it a live count or a static note?
+2. **If live, prefer existing APIs or git log over direct DB queries** — commit messages and application API endpoints are safer than raw database access
 3. **If static, note the date** — include the snapshot date when presenting counts
 4. **Prefer git log over memory** — commit messages tell you what actually shipped
 
-## DB Query Examples
+## ⚠️ Data Source Safety
+
+**Direct database queries (via CLI, Prisma, curl, etc.) require explicit user approval in the current turn.** Never run queries against production databases without confirmation. Prefer:
+
+- **git log** — commit messages tell you what shipped
+- **Application API endpoints** — use existing routes (e.g., `/api/admin/stats`)
+- **File timestamps** — check mtime on snapshot files
+- **User-provided context** — let the user confirm before reaching for a connection string
+
+If a DB query is necessary and approved:
+- Use read-only credentials
+- Prefer staging over production
+- Limit to the minimum data needed
+- Never output connection strings or credentials
+
+## Examples (conceptual — not executable)
 
 ```bash
-# Count active records
-DATABASE_URL="<connection_string>" npx tsx -e "
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
-const count = await prisma.ship.count({ where: { isActive: true } });
-console.log({ count });
-"
+# SAFER: Use git log to check what shipped
+git log --oneline --since="7 days ago"
+
+# REQUIRE APPROVAL: Any direct database access
+# (Never run without user confirmation in the current turn)
 ```
-
-## Cross-Environment Verification
-
-For deployment-related data (staging vs production), always verify both:
-
-```bash
-# Check staging
-DATABASE_URL="$STAGING_DB" npx prisma db execute --stdin <<< "SELECT count(*) FROM ships;"
-# Check production
-DATABASE_URL="$PROD_DB" npx prisma db execute --stdin <<< "SELECT count(*) FROM ships;"
-```
-
-The delta between environments is often more informative than either count alone.

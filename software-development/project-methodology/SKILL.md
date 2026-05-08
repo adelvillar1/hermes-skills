@@ -43,7 +43,8 @@ security:
       - "Modifies plan file frontmatter (status, updated date) on completion"
   safety:
     - "Never auto-commits — all file writes are explicitly reviewed by the user"
-    - "Local env file (CLAUDE.local.md) is gitignored; secrets are never written to recaps or plans"
+    - "Local env file (CLAUDE.local.md) requires explicit user approval before reading"
+    - "Direct database or API queries require explicit user approval in the current turn"
     - "Plan files are markdown with frontmatter — no executable code"
     - "Recap content is human-readable session journaling, not automated data collection"
 ---
@@ -98,8 +99,10 @@ available during the session. If not installed, skip — it's additive.
 
 ### 3. Read foundational files
 
+Read in this order:
+
 - **Project memory file** (CLAUDE.md) — hard rules, today's state, pointer index
-- **Local env file** (CLAUDE.local.md) — credentials and URLs (never paste contents)
+- **Local env file** (CLAUDE.local.md) — credentials and URLs. **Do NOT read this file automatically.** Only read it when the user explicitly asks you to check a credential, connection string, or environment variable, and only after they confirm in the current turn. Never paste contents into chat output.
 
 ### 4. Read latest recaps
 
