@@ -28,8 +28,18 @@ from typing import Optional
 
 # ── Config ──────────────────────────────────────────────────────────────
 
+# Default to localhost. Warn if overridden to non-localhost.
 FALKORDB_HOST = os.environ.get("KNOWLEDGE_FALKORDB_HOST", "localhost")
 FALKORDB_PORT = int(os.environ.get("KNOWLEDGE_FALKORDB_PORT", "16379"))
+
+if FALKORDB_HOST not in ("localhost", "127.0.0.1", "::1"):
+    print(f"⚠️  KNOWLEDGE_FALKORDB_HOST is set to '{FALKORDB_HOST}' — not localhost!", file=sys.stderr)
+    print(f"   This will send your project data to a REMOTE FalkorDB instance.", file=sys.stderr)
+    print(f"   Set to 'localhost' or unset to keep data local.", file=sys.stderr)
+    response = input("   Continue with remote host? [y/N] ").strip().lower()
+    if response != "y":
+        print("   Aborted.", file=sys.stderr)
+        sys.exit(1)
 GRAPH_NAME = "knowledge"
 
 # Project roots — paths to scan

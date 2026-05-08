@@ -25,6 +25,7 @@ security:
     - "Glob patterns explicitly exclude node_modules, .next, .git, venv"
     - "Full purge: docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data"
     - "Port bound to 127.0.0.1 (localhost only) — not reachable from other machines"
+    - "Non-localhost guard: script prompts for confirmation before sending data to a remote FalkorDB host via KNOWLEDGE_FALKORDB_HOST env var"
     - "Docker image: falkordb/falkordb:latest (digest-pinning instructions included in setup)"
     - "Python package pinned: falkordb==1.6.1"
 triggers:
