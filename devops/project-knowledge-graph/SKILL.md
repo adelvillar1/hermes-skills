@@ -23,7 +23,9 @@ security:
   safety:
     - "Indexing is content-hash-gated: unchanged documents skip MERGE"
     - "Glob patterns explicitly exclude node_modules, .next, .git, venv"
-    - "Can be disabled at any time: docker stop knowledge-graph"
+    - "Full purge: docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data"
+    - "Docker image: falkordb/falkordb:latest (no versioned tags available from publisher)"
+    - "Python package pinned: falkordb==1.6.1"
 triggers:
   - "knowledge.*graph"
   - "cross.project.*knowledge"
@@ -78,19 +80,21 @@ Ranked results with project, file, heading, snippet
 
 ```bash
 docker run -d \
-  --restart=always \
+  --restart=unless-stopped \
   -p 16379:6379 \
   -v knowledge-graph-data:/data \
   --name knowledge-graph \
   falkordb/falkordb:latest
 ```
 
-Auto-starts on boot via `--restart=always`. Data persists in the Docker volume.
+Auto-starts on Docker daemon start via `--restart=unless-stopped`. Data persists in the Docker volume.
+
+> **ℹ️ Persistence note:** The container uses `--restart=unless-stopped` to survive Docker restarts but won't auto-restart after a manual `docker stop`. To disable persistence entirely, omit `--restart` and start the container manually when needed.
 
 ### 2. Install the Python dependency
 
 ```bash
-pip install falkordb
+pip install falkordb==1.6.1
 ```
 
 ### 3. Verify
@@ -112,6 +116,12 @@ python3 ~/.hermes/scripts/project-knowledge-index.py index
 # Preview without writing
 python3 ~/.hermes/scripts/project-knowledge-index.py index --dry-run
 ```
+
+> **⚠️ Before first real run:** Use `--dry-run` to preview which files would be indexed. This is especially important when configuring `PROJECT_ROOTS` for the first time — it shows you exactly which files the scraper will read before any data is written to FalkorDB.
+>
+> ```bash
+> python3 ~/.hermes/scripts/project-knowledge-index.py index --dry-run
+> ```
 
 ### Query by concept
 
@@ -230,6 +240,40 @@ Subsequent runs are <1s (only new/changed files are re-indexed). The indexer use
 ### 6. The skill indexes itself
 
 Since the project-knowledge-graph SKILL.md is in `~/.hermes/skills/`, it gets indexed. Query results may show matches from this skill's documentation — usually harmless.
+
+## Data Retention & Purge
+
+Indexed content persists in the Docker volume until explicitly removed. This means cross-project knowledge is available across sessions without re-indexing, but stale or sensitive content remains searchable until purged.
+
+### Stop the service (keep data)
+
+```bash
+docker stop knowledge-graph
+```
+
+To re-enable: `docker start knowledge-graph`
+
+### Clear all indexed data (stop + purge)
+
+```bash
+docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data
+```
+
+After purging, re-run `knowledge index` (first run will be ~60s to rebuild the index).
+
+### Selective re-indexing (update specific projects)
+
+The indexer uses content hashing — unchanged documents are skipped automatically. To force a full re-index of all projects (e.g. after changing `PROJECT_ROOTS`):
+
+```bash
+# Option A: Clear and re-index
+docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data
+docker run -d --restart=unless-stopped -p 16379:6379 -v knowledge-graph-data:/data --name knowledge-graph falkordb/falkordb:latest
+python3 ~/.hermes/scripts/project-knowledge-index.py index
+
+# Option B: Just re-index (updates changed files, retains unchanged)
+python3 ~/.hermes/scripts/project-knowledge-index.py index
+```
 
 ## CLI Reference
 
