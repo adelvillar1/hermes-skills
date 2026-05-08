@@ -4,9 +4,17 @@ A collection of Hermes Agent skills for structured project methodology, cross-pr
 
 ## Skills Index
 
-### Software Development Methodology
+### 🏆 Project Methodology (recommended)
 
-These skills form a complete project lifecycle methodology. They're designed to be used in sequence as a session cycle:
+| Skill | Purpose |
+|-------|---------|
+| [project-methodology](software-development/project-methodology/SKILL.md) | **Single integrated lifecycle** — warmup → plan → build → recap → wrapup in one skill. Loads context, drafts plans, writes recaps, verifies handoffs. Includes templates and reference files. |
+
+One skill. One cycle. Nothing falls through the cracks.
+
+### Individual Methodology Skills
+
+If you prefer granular control, the cycle is also available as individual skills:
 
 ```
 warmup → plan → build → recap → wrapup → (next session) warmup → ...
