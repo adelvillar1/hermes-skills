@@ -4,7 +4,7 @@ Use when the user asks for a deep dive into ONE specific domain/feature within a
 
 ## Precondition
 - [ ] CLAUDE.md read (project memory, hard rules, today's state)
-- [ ] CLAUDE.local.md read (if credentials needed)
+- [ ] CLAUDE.local.md — **only read with explicit user approval in the current turn** (ask before reading)
 - [ ] Latest 1-3 recaps read (last session context)
 - [ ] Active plans identified and read
 
