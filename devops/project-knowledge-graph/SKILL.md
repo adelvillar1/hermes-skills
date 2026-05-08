@@ -12,7 +12,7 @@ metadata:
   hermes:
     homepage: https://github.com/adelvillar1
     tags: [knowledge-graph, cross-project, falkordb, search, project-memory]
-    related_skills: [project-warmup, pipeline-script-verification, session-wrapup]
+    related_skills: [project-warmup, pipeline-script-verification, session-wrapup, project-wrapup, write-session-recap, draft-feature-plan]
 security:
   scope:
     persistence:

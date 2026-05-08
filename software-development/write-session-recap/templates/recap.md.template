@@ -1,0 +1,111 @@
+# Session Recap — {{YYYY-MM-DD}}
+
+## Summary
+
+{{1-2 sentences capturing the session's headline accomplishment. What's the one thing you'd tell someone in a hallway?}}
+
+## Plans worked on
+
+{{For each active plan touched this session, link by filename and walk acceptance criteria:}}
+
+### `docs/plans/{{plan-filename}}.md` — {{Feature Name}}
+
+Status after this session: **{{active | completed}}**
+
+| Acceptance criterion | Status | Notes |
+|---|---|---|
+| {{criterion 1}} | ✅ met | {{brief justification}} |
+| {{criterion 2}} | ⏸️ partial | {{what's left}} |
+| {{criterion 3}} | ❌ not met | {{why}} |
+| {{criterion 4}} | ⏭️ deferred | {{reason and target}} |
+
+{{If a plan was marked completed in this session, note the status change here.}}
+
+{{If the work was maintenance / not associated with a plan, write: "No active plan — this was maintenance work" and skip this section.}}
+
+## Commits
+
+| Hash | Message |
+|------|---------|
+| `{{abc1234}}` | {{commit subject}} |
+| `{{def5678}}` | {{commit subject}} |
+
+{{If no commits yet (work-in-progress only), write: "No commits yet — work is uncommitted on the {{branch}} branch."}}
+
+---
+
+## What was added
+
+{{Prose description of new capabilities. Skip if there's nothing new.}}
+
+## What was fixed
+
+{{Prose description of bug fixes. Skip if there are none.}}
+
+## What was changed
+
+{{Prose description of behavior changes that aren't strictly additions or fixes — refactors, conventions updates, infrastructure tweaks. Skip if none.}}
+
+## Files changed
+
+Grouped by area:
+
+**Frontend**
+- `{{path}}` — {{one-line description}}
+
+**Backend / API**
+- `{{path}}` — {{one-line description}}
+
+**Database**
+- `{{path or migration name}}` — {{one-line description}}
+
+**Documentation**
+- `{{path}}` — {{one-line description}}
+
+**Configuration / Infra**
+- `{{path}}` — {{one-line description}}
+
+(Delete sections that don't apply.)
+
+---
+
+## Doc updates applied
+
+Contract docs that were updated during this session as part of finishing the work:
+
+- `docs/features/{{name}}.md` — {{one-line summary of what was added or changed}}
+- `TECHNICAL-DOCUMENTATION.md` § {{section}} — {{one-line summary}}
+- `FUNCTIONAL-SPECIFICATIONS.md` § {{section}} — {{one-line summary}}
+
+{{If no contract docs needed updating because the change was small, write: "No contract doc updates needed — change is too small or not user-visible."}}
+
+## Doc updates deferred (debt)
+
+Contract docs that should have been updated but weren't, with the reason:
+
+- `{{contract doc and section}}` — {{what needs to be added}}. **Deferred because**: {{reason}}. **Target**: {{when to address}}.
+
+{{Empty list is good. A non-empty list is a known debt the next session should pick up.}}
+
+## CLAUDE.local.md changes
+
+{{Only include this section if CLAUDE.local.md was edited this session. Never paste secret values.}}
+
+- Updated {{section}}: {{high-level description of what changed}}
+
+---
+
+## Open questions / next steps
+
+Things left for future sessions:
+
+- {{open question or TBD}}
+- {{follow-up task}}
+
+{{Empty list is fine if everything's resolved.}}
+
+## Notes
+
+Free-form observations, gotchas, decisions that don't fit elsewhere, things future sessions should know:
+
+- {{observation}}

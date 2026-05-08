@@ -1,125 +1,69 @@
 # Hermes Skills — by Alejandro Del Villar
 
-A collection of Hermes Agent skills for cross-project knowledge management, automation, and developer productivity.
+A collection of Hermes Agent skills for structured project methodology, cross-project knowledge management, and developer productivity. Every skill here was extracted from real production workflows across multiple SaaS products.
 
-## Skills
+## Skills Index
 
-### Project Knowledge Graph
+### Software Development Methodology
 
-> A local FalkorDB-backed semantic index over all your project artifacts. Query by concept across every project you've ever worked on.
+These skills form a complete project lifecycle methodology. They're designed to be used in sequence as a session cycle:
 
-**What it does:**
-
-Hermes already has persistent memory, but it's per-session — it remembers facts about you and preferences across conversations. The Project Knowledge Graph goes further: it indexes the *content* of every project you've built — session recaps, implementation plans, CLAUDE.md conventions, architecture docs, feature specs, and all your Hermes skills — into a local FalkorDB graph database running in Docker.
-
-When you search across projects during a session, instead of hoping the right context is in memory, the graph returns ranked results by concept, with project name, file path, heading, and a snippet — regardless of which project the knowledge came from.
-
-**Indexed document types:**
-| Type | What's included |
-|------|----------------|
-| `recap` | Session recaps and daily recaps |
-| `plan` | Implementation plans |
-| `claude` | Project memory files (CLAUDE.md, etc.) |
-| `architecture` | Architecture docs, feature docs, operations docs, pipeline docs, technical/functional specifications |
-| `skill` | Every SKILL.md across all installed Hermes skills |
-
-**Key capabilities:**
-- Two-stage ranking: Cypher CONTAINS (fast primary filter) → TF-IDF re-ranking (relevance scoring)
-- Incremental indexing: content hashing means unchanged documents are skipped in <1s
-- Cross-project: one query searches all configured projects simultaneously
-- Zero API calls: no LLM embeddings, no external services — runs entirely locally
-- Smart scoping: targeted glob patterns (not rglob) avoid node_modules and build artifacts
-- Auto-projection: integrates with session-wrapup to index new knowledge at session end
-
-**Architecture:**
 ```
-knowledge index
-    │
-    ▼
-Scans project directories for .md artifacts
-    ├── docs/recaps/, docs/daily-recaps/
-    ├── docs/plans/
-    ├── project memory file
-    ├── docs/architecture/, docs/features/, docs/operations/, docs/pipeline/
-    ├── TECHNICAL-DOCUMENTATION.md, FUNCTIONAL-SPECIFICATIONS.md
-    └── **/SKILL.md (Hermes skills)
-    │
-    ▼
-Chunks by heading-2 boundaries + paragraphs (max 2000 chars)
-    │
-    ▼
-MERGE into FalkorDB graph as :Chunk nodes
-    │
-    ▼
-knowledge query "concept"
-    │
-    ▼
-Stage 1: Cypher CONTAINS (fast primary filter)
-Stage 2: TF-IDF re-ranking
-    │
-    ▼
-Ranked results with project, file, heading, snippet
+warmup → plan → build → recap → wrapup → (next session) warmup → ...
 ```
 
-**Setup (one-time):**
-```bash
-docker run -d \
-  --restart=unless-stopped \
-  -p 16379:6379 \
-  -v knowledge-graph-data:/data \
-  --name knowledge-graph \
-  falkordb/falkordb:latest
+| Stage | Skill | Purpose |
+|-------|-------|---------|
+| Start | [project-warmup](software-development/project-warmup/SKILL.md) | Load project context, surface open follow-ups, check knowledge graph |
+| Plan | [draft-feature-plan](software-development/draft-feature-plan/SKILL.md) | Draft a feature plan with acceptance criteria |
+| Plan | [writing-plans](software-development/writing-plans/SKILL.md) | Write bite-sized implementation plans |
+| Plan | [plan](software-development/plan/SKILL.md) | Plan mode — write markdown plan, no execution |
+| Plan | [plan-execution-preparation](software-development/plan-execution-preparation/SKILL.md) | Scope precisely before building |
+| Build | *(implementation)* | The actual work |
+| Recap | [write-session-recap](software-development/write-session-recap/SKILL.md) | Draft session recap, walk acceptance criteria |
+| Wrap | [session-wrapup](software-development/session-wrapup/SKILL.md) | End-of-session verification |
+| Wrap | [project-wrapup](software-development/project-wrapup/SKILL.md) | Verify handoff to next session |
 
-pip install falkordb==1.6.1
-```
+### Project Scaffolding
 
-> **⚠️ Before your first real index**, run the dry-run first to preview which files will be read:
-> ```bash
-> python3 ~/.hermes/scripts/project-knowledge-index.py index --dry-run
-> ```
+| Skill | Purpose |
+|-------|---------|
+| [init-project-structure](software-development/init-project-structure/SKILL.md) | Scaffold a new project with full methodology — CLAUDE.md, docs, contracts |
+| [slim-claude-md](software-development/slim-claude-md/SKILL.md) | Restructure bloated CLAUDE.md into slim router + topical docs |
 
-**Data retention & purge:**
+### Codebase Onboarding
 
-Indexed content persists in the Docker volume until explicitly removed:
+| Skill | Purpose |
+|-------|---------|
+| [codebase-survey](software-development/codebase-survey/SKILL.md) | Survey an existing codebase — architecture, complexity, scope |
+| [tech-stack-evaluation](software-development/tech-stack-evaluation/SKILL.md) | Evaluate whether the tech stack fits the project's goals |
+
+### Cross-Project Knowledge
+
+| Skill | Category | Purpose |
+|-------|----------|---------|
+| [project-knowledge-graph](devops/project-knowledge-graph/SKILL.md) | DevOps | FalkorDB-backed semantic index across all projects |
+
+The `project-knowledge-graph` skill integrates with the methodology cycle — when `project-warmup` runs at session start, it checks the knowledge graph health and surfaces cross-project connections. When `session-wrapup` runs at session end, it automatically re-indexes new knowledge.
+
+---
+
+## Installation
+
+Each skill can be installed individually:
 
 ```bash
-# Stop the service (keep data)
-docker stop knowledge-graph
+# Install a methodology skill
+hermes skills install https://raw.githubusercontent.com/adelvillar1/hermes-skills/main/software-development/project-warmup/SKILL.md --name project-warmup
 
-# Clear all indexed data (stop + purge)
-docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data
-```
-
-**Usage:**
-```bash
-# Index all projects
-python3 ~/.hermes/scripts/project-knowledge-index.py index
-
-# Query by concept
-python3 ~/.hermes/scripts/project-knowledge-index.py query "FalkorDB replication"
-
-# Filter by project or doc type
-python3 ~/.hermes/scripts/project-knowledge-index.py query "batch writes" --project CI
-python3 ~/.hermes/scripts/project-knowledge-index.py query "soft delete" --type skill
-
-# Health check
-python3 ~/.hermes/scripts/project-knowledge-index.py doctor
-```
-
-**Why FalkorDB over alternatives:**
-- **Cypher CONTAINS** (exact match) as primary filter — faster and more predictable than fuzzy simhash
-- **Native graph model** — cross-project queries are `MATCH (c:Chunk {project:'CI'}) RETURN c`, no JOINs needed
-- **Schema-free** — add new node types and edges on the fly without migrations
-- **Sub-200MB idle** — runs in a single Docker container with `--restart=unless-stopped`
-- **Full purge** — `docker stop && docker rm && docker volume rm` erases all indexed data
-
-**Install via Hermes:**
-```bash
+# Install the knowledge graph
 hermes skills install https://raw.githubusercontent.com/adelvillar1/hermes-skills/main/devops/project-knowledge-graph/SKILL.md --name project-knowledge-graph
 ```
+
+Replace `project-warmup` with any skill name from the index above.
 
 ---
 
 ## About the author
 
-**Alejandro Del Villar** — B2B SaaS founder and Hermes Agent power user. Building cruiseintelligence.com and other products. Most Hermes skills here were extracted from real production workflows, solving actual problems across multiple projects.
+**Alejandro Del Villar** — B2B SaaS founder and Hermes Agent power user. Building cruiseintelligence.com and other products. These skills were extracted from real production workflows solving actual problems across multiple projects. No theory — everything here has been battle-tested.

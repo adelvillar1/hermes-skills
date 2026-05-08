@@ -1,0 +1,100 @@
+---
+status: draft
+created: {{YYYY-MM-DD}}
+updated: {{YYYY-MM-DD}}
+slug: {{slug}}
+---
+
+# Plan: {{Feature Name}}
+
+## Context
+
+{{2-4 sentences. The problem this work solves, the user need, what triggered it. Reference any prior recaps or existing features that inform the design. Don't pad — short context is fine if the problem is clear.}}
+
+## Approach
+
+{{1-2 paragraphs describing the recommended approach. Just one approach, not a menu. Reference existing utilities/functions/tables that will be reused so it's clear we're not reinventing.}}
+
+High-level steps:
+
+1. {{step}}
+2. {{step}}
+3. {{step}}
+
+## Acceptance criteria
+
+These are the contract. Each one is a verifiable assertion. The work is "done" when every box is checked.
+
+- [ ] {{single-sentence verifiable assertion}}
+- [ ] {{single-sentence verifiable assertion}}
+- [ ] {{single-sentence verifiable assertion}}
+
+## Files to be touched
+
+**Frontend:**
+- `{{path}}` — {{what changes}}
+
+**Backend / API:**
+- `{{path}}` — {{what changes}}
+
+**Database:**
+- `{{path or migration name}}` — {{what changes}}
+
+**Scripts:**
+- `{{path}}` — {{what changes}}
+
+**Tests:**
+- `{{path}}` — {{what changes}}
+
+**Documentation (see Linked artifacts below):**
+- `docs/features/{{name}}.md` — update / create
+- `TECHNICAL-DOCUMENTATION.md` — section {{n}}
+- `FUNCTIONAL-SPECIFICATIONS.md` — section {{n}}
+
+(Delete sections that don't apply.)
+
+## Out of scope
+
+Things people might assume are part of this work but aren't:
+
+- {{thing not in scope}}
+- {{thing not in scope}}
+
+## Verification
+
+How to confirm each criterion is met. One block per criterion if they're not self-evidently testable.
+
+**Criterion 1: {{restate}}**
+```bash
+{{command or steps}}
+```
+Expected: {{what to look for}}
+
+**Criterion 2: {{restate}}**
+{{manual steps or screen to check}}
+
+## Linked artifacts
+
+Documents that need updating when this work is done. The recap workflow will prompt for each.
+
+- `docs/features/{{name}}.md` — {{what to add}}
+- `TECHNICAL-DOCUMENTATION.md` section {{n}} "{{section name}}" — {{what to add}}
+- `FUNCTIONAL-SPECIFICATIONS.md` section {{n}} "{{section name}}" — {{what to add}}
+
+(If the change is too small to require contract-doc updates, write `- None — change is too small to require contract doc updates` and explain why in one sentence.)
+
+## Risks
+
+Things that could go wrong. Empty list is fine if nothing concerning.
+
+- {{risk and mitigation}}
+
+## Dependencies
+
+Other plans or features this depends on.
+
+- {{plan filename or external dependency}}
+
+## Notes
+
+Anything that doesn't fit the sections above. Decisions made during drafting, alternatives considered and rejected with reasons, references to relevant commits or issues.
