@@ -1,6 +1,6 @@
 ---
 name: slim-claude-md
-description: "Use when a project's CLAUDE.md is over ~300 lines, when starting a new project from scratch, or when the user mentions context bloat, lost env URLs, sessions pointing at the wrong environment, CLAUDE.md becoming a journal, or wanting to organize project memory. Restructures or initializes a slim router-style CLAUDE.md, a gitignored CLAUDE.local.md for credentials, a topical docs/ tree, and a housekeeping protocol that keeps the structure from rebloating."
+description: "Use when a project's project memory file is over ~300 lines, when starting a new project from scratch, or when the user mentions context bloat, lost env URLs, sessions pointing at the wrong environment, the memory file becoming a journal, or wanting to organize project context. Restructures or initializes a slim router-style memory file, a gitignored local env file for credentials, a topical docs/ tree, and a housekeeping protocol that keeps the structure from rebloating."
 version: 2.0.0
 author: Alejandro Del Villar
 license: MIT
@@ -80,11 +80,11 @@ Don't create `pipeline/` or `scripts/` if the project has no data pipeline or do
 
 ### A3. Write CLAUDE.md from the template
 
-Read `references/CLAUDE.md.template`, substitute placeholders with values from A1. Inline the housekeeping protocol from `references/housekeeping-protocol.md` verbatim. Write to project root.
+Read `references/CLAUDE-template.md`, substitute placeholders with values from A1. Inline the housekeeping protocol from `references/housekeeping-protocol.md` verbatim. Write to project root.
 
 ### A4. Write CLAUDE.local.md from the template
 
-Read `references/CLAUDE.local.md.template`, substitute placeholders for branch/env structure. Leave actual secret values as `<paste-here>` placeholders. Write to project root.
+Read `references/CLAUDE-local-template.md`, substitute placeholders for branch/env structure. Leave actual secret values as `<paste-here>` placeholders. Write to project root.
 
 ### A5. Update .gitignore
 
@@ -173,7 +173,7 @@ These are the load-bearing parts that genuinely need to be in every session's co
 5. `git mv` existing `SESSION-RECAP-*.md` files into `docs/recaps/`.
 6. Write each topical docs file using content extracted from CLAUDE.md.
 7. Write `docs/STATE-SNAPSHOT.md` with dated entity counts pulled from CLAUDE.md.
-8. Rewrite `CLAUDE.md` from `references/CLAUDE.md.template`, substituting hard rules, branch table, and pointer index. Inline housekeeping protocol.
+8. Rewrite `CLAUDE.md` from `references/CLAUDE-template.md`, substituting hard rules, branch table, and pointer index. Inline housekeeping protocol.
 9. Verify (see B6).
 
 ### B6. Verify
