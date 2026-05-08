@@ -64,13 +64,30 @@ Ranked results with project, file, heading, snippet
 **Setup (one-time):**
 ```bash
 docker run -d \
-  --restart=always \
+  --restart=unless-stopped \
   -p 16379:6379 \
   -v knowledge-graph-data:/data \
   --name knowledge-graph \
   falkordb/falkordb:latest
 
-pip install falkordb
+pip install falkordb==1.6.1
+```
+
+> **⚠️ Before your first real index**, run the dry-run first to preview which files will be read:
+> ```bash
+> python3 ~/.hermes/scripts/project-knowledge-index.py index --dry-run
+> ```
+
+**Data retention & purge:**
+
+Indexed content persists in the Docker volume until explicitly removed:
+
+```bash
+# Stop the service (keep data)
+docker stop knowledge-graph
+
+# Clear all indexed data (stop + purge)
+docker stop knowledge-graph && docker rm knowledge-graph && docker volume rm knowledge-graph-data
 ```
 
 **Usage:**
@@ -93,7 +110,8 @@ python3 ~/.hermes/scripts/project-knowledge-index.py doctor
 - **Cypher CONTAINS** (exact match) as primary filter — faster and more predictable than fuzzy simhash
 - **Native graph model** — cross-project queries are `MATCH (c:Chunk {project:'CI'}) RETURN c`, no JOINs needed
 - **Schema-free** — add new node types and edges on the fly without migrations
-- **Sub-200MB idle** — runs in a single Docker container, starts on boot automatically
+- **Sub-200MB idle** — runs in a single Docker container with `--restart=unless-stopped`
+- **Full purge** — `docker stop && docker rm && docker volume rm` erases all indexed data
 
 **Install via Hermes:**
 ```bash
