@@ -1,6 +1,10 @@
 # Local Environment Reference (NOT in git)
 
-> Auto-loaded by Claude Code alongside `CLAUDE.md` but gitignored. Contains live connection strings and credentials. **Never paste these into commits, PRs, shared docs, web tools, or screenshots.**
+> **⚠️ SECURITY WARNING:** This file is auto-loaded by the agent alongside CLAUDE.md but is gitignored. It is designed to hold LIVE credentials, connection strings, API keys, and tokens. **This is a convenience mechanism, not a security boundary.**
+>
+> **If you fill this file with real secrets, every agent session will have access to them.** Only include the minimum credentials needed for the agent to operate. Rotate keys if you suspect exposure. Never paste contents into commits, PRs, shared docs, web tools, or screenshots.
+>
+> **Recommended alternatives:** Use a vault, environment manager, or `.env` files with least-privilege scoped credentials instead of putting production keys here. Consider read-only credentials for staging environments and short-lived tokens for production.
 
 ---
 
