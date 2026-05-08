@@ -1,10 +1,14 @@
 # Local Environment Reference (NOT in git)
 
-> **⚠️ SECURITY WARNING:** This file is auto-loaded by the agent alongside CLAUDE.md but is gitignored. It is designed to hold LIVE credentials, connection strings, API keys, and tokens. **This is a convenience mechanism, not a security boundary.**
+> **⚠️ SECURITY BEST PRACTICE:** This file records *where* each environment lives and *which env var names* it uses — it should NOT contain inline secret values.
 >
-> **If you fill this file with real secrets, every agent session will have access to them.** Only include the minimum credentials needed for the agent to operate. Rotate keys if you suspect exposure. Never paste contents into commits, PRs, shared docs, web tools, or screenshots.
+> **Secrets belong in environment variables** (`.env`, Railway Dashboard, Vercel Environment Variables, etc.), not in project files. Reference the env var name here so the agent knows what to use:
 >
-> **Recommended alternatives:** Use a vault, environment manager, or `.env` files with least-privilege scoped credentials instead of putting production keys here. Consider read-only credentials for staging environments and short-lived tokens for production.
+> ```bash
+> DATABASE_URL="$STAGING_DB_URL"  # ← reference the env var name, not the value
+> ```
+>
+> If you must document a specific credential value for a debugging or setup workflow, set a short-lived, read-only, staging-only token and rotate it after the session. Never embed production admin tokens in any file.
 
 ---
 
@@ -29,16 +33,12 @@
 - **URL**: {{url}}
 - **Branch**: `{{branch}}`
 - **Hosting service**: `{{service_name}}`
-- **DB external**: `<paste-here>`
-- **DB internal**: `<paste-here>`
+- **DB**: `${{ENV_PREFIX}}_DATABASE_URL` <!-- ← set as Railway/Vercel env var, not inline -->
 {{#HAS_REDIS}}
-- **Redis external**: `<paste-here>`
-- **Redis internal**: `<paste-here>`
+- **Redis**: `${{ENV_PREFIX}}_REDIS_URL`
 {{/HAS_REDIS}}
 {{#HAS_OTHER_SERVICES}}
-- **{{service_name}} external**: `<paste-here>`
-- **{{service_name}} internal**: `<paste-here>`
-- **{{service_name}} password**: `<paste-here>`
+- **{{service_name}}**: `${{ENV_PREFIX}}_{{SERVICE_KEY}}_URL`
 {{/HAS_OTHER_SERVICES}}
 
 {{/FOR_EACH_ENVIRONMENT}}
@@ -50,72 +50,41 @@
 | Service | URL | Notes |
 |---------|-----|-------|
 | App | http://localhost:3000 | <stack> |
-<!-- Add database, cache, mail catcher, etc. as applicable -->
+
+`DATABASE_URL` for local dev comes from `.env` or `docker-compose`, not from this file.
 
 ---
 
 ## Run migrations against a remote env
 
 ```bash
-# Example template — adapt to your stack:
-DATABASE_URL="<staging-url>" <migration-command>
+# Reference env vars set in Railway/Vercel, not inline values:
+DATABASE_URL="$STAGING_DATABASE_URL" npx prisma migrate deploy
 ```
 
 ---
 
-## API keys and external services
+## API keys and external services — env var references only
 
+| Service | Env var | Notes |
+|---------|---------|-------|
 <!--
-  One section per category of secret your project uses.
-  Common categories:
-  - DATABASE_URL / connection strings
-  - Auth secrets (NEXTAUTH_SECRET, JWT signing keys, OAuth client secrets)
-  - Payment provider keys (Stripe, Lemon Squeezy, etc.)
-  - LLM/AI keys (Anthropic, OpenAI, etc.)
-  - Email provider keys (Resend, SendGrid, Postmark)
-  - Object storage (S3, R2)
-  - Analytics (PostHog, Mixpanel)
-  - Error tracking (Sentry)
-
-  Don't list categories you don't use.
+  List env var NAMES here (not values), e.g.:
+  | Anthropic | ANTHROPIC_API_KEY | Set in Railway dashboard |
+  | Stripe | STRIPE_SECRET_KEY | Test mode only |
+  Never paste actual key values.
 -->
-
-```
-<!-- ANTHROPIC_API_KEY=your-api-key-here -->
-<!-- STRIPE_SECRET_KEY=your-api-key-here -->
-<!-- RESEND_API_KEY=your-api-key-here -->
-```
-
----
-
-## Personal tokens
-
-<!--
-  Things like your GitHub PAT, team Slack webhook, etc.
-  These rarely change but are useful to keep here so Claude can find them.
--->
-
-```
-<!-- GITHUB_TOKEN=your-token-here -->
-```
 
 ---
 
 ## Other infrastructure
 
-<!--
-  Anything else worth pinning so a future session doesn't ask:
-  - Helpdesk URL
-  - Analytics dashboard URL
-  - Support email addresses
-  - Internal admin URLs
--->
-
 | Service | URL | Notes |
 |---------|-----|-------|
+<!-- Helpdesk, analytics, admin dashboards — public URLs only, no secrets -->
 
 ---
 
 ## When you change anything in this file
 
-This file is gitignored, so updates leave no trace in `git log`. When you change a credential, URL, or add a new environment, **mention it in the session recap** so the change is at least visible in the project's history. Example: `Updated CLAUDE.local.md: rotated production DB password.`
+This file is gitignored, so updates leave no trace in `git log`. When you add a new env var reference, update a URL, or rotate a credential (which happens in the hosting dashboard, not here), **mention it in the session recap**. Example: `Updated CLAUDE.local.md: rotated staging DB password via Railway dashboard.`

@@ -26,7 +26,7 @@ Restructure or initialize a project's CLAUDE.md so it stays small, sustainable, 
 After running, the target project will have:
 
 - **A slim `CLAUDE.md` (≤ ~300 lines)** — acts as a router/index, not an encyclopedia. Contains hard rules, branch/environment topology (no secrets), pointers to topical docs, common commands, today's state, a housekeeping protocol, and a session protocol.
-- **A gitignored `CLAUDE.local.md`** — holds all live DB connection strings, credentials, hosting service names, API keys, and any other secret-shaped facts. Read before any DB or hosting operation.
+- **A gitignored `CLAUDE.local.md`** — holds environment URLs, hosting service names, and env var name references (not inline secrets). The agent reads it before any DB or hosting operation to know which env vars to use.
 - **A topical `docs/` tree** (`architecture/`, `features/`, `pipeline/`, `scripts/`, `recaps/`) containing reference material previously stuffed into CLAUDE.md. Each file loaded on-demand.
 - **A built-in housekeeping protocol** inside CLAUDE.md so future sessions know where new facts belong and the structure doesn't decay.
 - **`.gitignore` updated** to exclude `CLAUDE.local.md`.
@@ -84,15 +84,14 @@ Read `references/CLAUDE-template.md`, substitute placeholders with values from A
 
 ### A4. Write CLAUDE.local.md from the template
 
-Read `references/CLAUDE-local-template.md`, substitute placeholders for branch/env structure. Leave actual secret values as `<paste-here>` placeholders. Write to project root.
+Read `references/CLAUDE-local-template.md`, substitute placeholders for branch/env structure. The template uses env var name references instead of inline credential slots. Write to project root.
 
 ### A5. Update .gitignore
 
 Add (only if not already present):
 
-```
-# Claude Code local memory — contains live credentials. Auto-loaded by
-# Hermes alongside CLAUDE.md but never committed.
+```gitignore
+# Claude local env reference — env var names and URLs only, not credential values
 CLAUDE.local.md
 ```
 
@@ -111,7 +110,7 @@ ls docs/
 
 Tell the user:
 - "CLAUDE.md and CLAUDE.local.md are ready. CLAUDE.local.md is gitignored."
-- "Open CLAUDE.local.md and fill in the actual credentials — I left them as placeholders."
+- "Open CLAUDE.local.md and add the env var name references — secrets go in Railway dashboard / .env files, not inline in this file."
 - "As you build the project, add new facts to the relevant `docs/` file, not directly to CLAUDE.md."
 
 Do not commit anything. The user owns the first commit.
@@ -141,7 +140,7 @@ Read CLAUDE.md in chunks if it's >2000 lines so the full content is in context f
 For each top-level `## Section` in the current CLAUDE.md, decide:
 
 - **Stays in slim CLAUDE.md**: hard rules, branch table, common commands, today's-state bullets
-- **Moves to `CLAUDE.local.md`**: any block containing connection strings, passwords, API keys, internal proxy URLs
+- **Moves to `CLAUDE.local.md`**: any block containing connection strings, passwords, API keys, or internal proxy URLs — convert to env var name references, not inline values
 - **Moves to `docs/architecture/<name>.md`**: schema, auth, caching, project structure, rating systems, patterns
 - **Moves to `docs/features/<name>.md`**: per-feature deep dives (one file per major feature)
 - **Moves to `docs/pipeline/<name>.md`**: data pipelines, scrapers, sync scripts
@@ -203,7 +202,7 @@ The user owns the commit.
 ## Things to Avoid in Either Mode
 
 1. **Do not invent project facts.** If you don't know production URL, hosting, or branch structure, ask. Don't guess.
-2. **Do not put real secret values in any tracked file.** `CLAUDE.local.md` only, and it must be gitignored before writing.
+2. **Do not put real secret values in any file.** Reference env var names (e.g., `$STAGING_DATABASE_URL`) instead of inline values. Secrets go in environment variables (Railway dashboard, .env files, etc.) — not in project files. `CLAUDE.local.md` and `.env` must be gitignored before writing.
 3. **Do not duplicate content** between CLAUDE.md and a docs file. Each fact lives in exactly one place.
 4. **Do not add stat tables to topical docs.** Counts (entities, rows, users) go in `docs/STATE-SNAPSHOT.md`.
 5. **Do not add "Updated YYYY-MM-DD" markers** to anything. Git history is the source of truth for "when".
