@@ -156,26 +156,33 @@ Capture:
 
 **Goal:** Understand what the system is supposed to do and what's already built.
 
-### 6. Auth and middleware
+### 6. Access control model
 
-Read the auth configuration and middleware/routing layer.
+Review the project's access control architecture — focusing on *what* is protected, not the specific secret values.
 
 Capture:
-- Auth strategy (JWT, session, OAuth)
-- Role model and how roles are enforced
-- Protected vs public routes
+- Auth strategy (JWT, session, OAuth) — from import/type files, not credential files
+- Role model and how roles are enforced (middleware, decorators, guards on routes)
+- Protected vs public route patterns
 - Middleware redirects and guards
 
-**Goal:** Understand who can access what.
+**Do NOT read files containing actual secrets** (credential files, `.env`, `CLAUDE.local.md`, API key configs, JWT secret values, OAuth client secrets, etc.). Read only:
+- Route middleware files (which check auth, not the auth config itself)
+- Type/interface files for auth models
+- The Prisma schema's User/Account/Session models
+- Route handler files to see guard patterns
+
+The goal is understanding *who can access what*, not finding credential values.
 
 ### 7. Key library files
 
 Read 3–5 of the most consequential utility files:
 - Database client singleton + soft-delete middleware
-- Auth config
+- Auth middleware (route guards, not credential config)
 - Cache layer
-- Encryption / credential handling
 - Feature flags / agency scope
+
+**Do NOT read:** files containing actual credential values, API keys, encryption secrets, or password hashes. Read the interface types and middleware patterns only.
 
 **Goal:** Understand the platform's shared infrastructure and guardrails.
 
@@ -298,14 +305,13 @@ After reading the codebase, produce a **complexity assessment** — not just fil
 
 **Goal:** The survey should convey *what kind of project this is*, not just what it contains.
 
-### 14. User profile context — embed after every survey
+### 14. Synthesize user context for future readers
 
-After the synthesized report, add a brief user-context note that any future session will benefit from:
+After the report, add a brief operating-context note that any future session will benefit from:
 
-- The user has 27 years of enterprise IT experience plus 2 years of AI with 10 specializations from Vanderbilt University
-- Everything is a compression mechanism: plans, recaps, contract docs, skills, CLAUDE.local.md — all designed to eliminate context re-discovery. Stale CLAUDE.local.md is a bug, not a question.
-- Communication must be action-first. Read everything before suggesting anything. Own errors immediately.
-- The user builds B2B SaaS with real customers. Uptime is non-negotiable.
+- Everything in this project's methodology is a compression mechanism: plans, recaps, contract docs, skills, local env files — all designed to eliminate context re-discovery.
+- Communication should be action-first. Read everything before suggesting anything. Own errors immediately.
+- This is a live production product with real customers. Uptime is non-negotiable.
 
 **Goal:** Any future agent that reads this survey report understands who the user is and how they operate, not just what the code contains.
 
@@ -322,7 +328,7 @@ After the synthesized report, add a brief user-context note that any future sess
 2. **Reading files the project doesn't have.** If there's no `README.md`, note it and move on. Don't fabricate.
 3. **Getting lost in one file.** If a file is huge (> 400 lines), read the first 100 and the last 50, or scan for exported functions. The survey is breadth-first, not depth-first.
 4. **Ignoring git history.** The commit log tells you what the team actually values (feature commits vs. fix commits vs. doc commits). Use it.
-5. **Forgetting environment discipline.** If the project has staging/production credentials in a gitignored file, read it if needed but never include values in the synthesized report.
+5. **Forgetting environment discipline.** If the project has staging/production credentials in a gitignored file, reference the env var names only — never read or include actual secret values in the synthesized report.
 6. **Stopping at "what" instead of "how maintainable."** A survey that only lists files and endpoints misses the user's real question: "can I work with this?" Always include the maintainability assessment (file size audit, coupling analysis, grade) so the user has actionable intelligence, not just a catalogue.
 7. **Confusing targeted deep dive with full survey.** When the user asks for a "deep dive of X" in an already-familiar project, do NOT run the full 14-step codebase survey. That wastes time reading areas they already know. Use the targeted domain deep dive pattern instead (6 steps, depth-first into one area).
 8. **Confusing targeted deep dive with lightweight warmup.** The `project-warmup` skill's lightweight mode handles "answer a question by reading one doc." A deep dive requires reading ALL source files (routes, pipeline, schema, UI) under the domain. The separation line: if you can answer from one doc file, it's lightweight warmup. If you need to read multiple implementation files + the feature doc, it's a targeted deep dive. When in doubt, lean toward deep dive — reading extra files costs minutes, piecing together incomplete context costs the user's time.

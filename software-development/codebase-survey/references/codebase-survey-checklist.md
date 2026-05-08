@@ -29,17 +29,18 @@ Use this as a checklist while running a survey. Copy into scratch space and tick
 - [ ] `docs/implementation-plan.md` or equivalent → phases, acceptance criteria
 - [ ] Active plans identified (grep `^status: active`)
 
-## Phase 6: Auth and Middleware
-- [ ] Auth config file read
-- [ ] Middleware/routing layer read
-- [ ] Role model + enforcement mechanism captured
+## Phase 6: Access Control Model
+- [ ] Auth strategy identified from types/interfaces (not credential files)
+- [ ] Role model + enforcement mechanism captured from route guards/middleware
+- [ ] Protected vs public route patterns documented
+- [ ] **No secret files read** — credential configs, .env, and API key files explicitly skipped
 
 ## Phase 7: Key Library Files
 - [ ] DB client singleton + soft-delete or transaction helpers
-- [ ] Auth config (JWT/session/OAuth)
+- [ ] Auth middleware (not config — just how auth is checked on routes)
 - [ ] Cache or shared infra layer
-- [ ] Encryption or credential handling
 - [ ] Feature flags / tenant scoping
+- [ ] **Avoid: credential configs, API key files, env var value files**
 
 ## Phase 8: Routing Structure
 - [ ] `find src/app -type d` or equivalent → route tree
