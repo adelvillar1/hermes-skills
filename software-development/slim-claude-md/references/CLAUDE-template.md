@@ -4,7 +4,7 @@
 > {{#PRODUCTION_URL}}Production: {{PRODUCTION_URL}}{{/PRODUCTION_URL}}
 > Repo: {{REPO_URL}}
 
-**Live DB connection strings, credentials, and hosting service names are in `CLAUDE.local.md` (gitignored, auto-loaded by Claude alongside this file).** Read it before any DB or hosting operation.
+**Environment URLs and env var name references are in `CLAUDE.local.md` (gitignored, auto-loaded by Claude alongside this file).** Read it before any DB or hosting operation to know which env vars and service URLs to use. Actual secret values should be set in the hosting platform's environment variable manager, not in any project file.
 
 ---
 
@@ -132,7 +132,7 @@ For trivial sessions (typo fix, dependency bump, one-line change), skip warmup a
 Otherwise:
 
 1. Read this file (auto-loaded).
-2. Read `CLAUDE.local.md` if you need any DB URL, hosting service name, or credential (auto-loaded).
+2. Read `CLAUDE.local.md` if you need an env var name reference or service URL (auto-loaded, contains no secret values — actual credentials are in the hosting platform's environment variables).
 3. For task-specific context, read the relevant `docs/` file from the "Where to find things" map.
 4. When changes are made, follow the housekeeping protocol above.
 

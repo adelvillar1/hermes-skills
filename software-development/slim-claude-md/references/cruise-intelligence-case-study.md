@@ -1,6 +1,8 @@
 # Case Study: Cruise Intelligence Migration
 
 > A real EXISTING-mode run of `slim-claude-md`. Read this in EXISTING mode before proposing your section→destination map. Use it as a reference for shape, not a literal template — every project's mapping will differ.
+>
+> **⚠️ Historical note:** This case study describes the *old* approach where CLAUDE.local.md held inline credentials. The current recommended pattern uses env var name references instead. The structural migration steps (extracting content, creating docs/) are still valid — just don't follow the credential-inlining pattern shown here. See the updated `CLAUDE-local-template.md` for the current approach.
 
 ## Problem state (before)
 

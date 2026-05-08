@@ -1,6 +1,6 @@
 ---
 name: slim-claude-md
-description: "Use when a project's project memory file is over ~300 lines, when starting a new project from scratch, or when the user mentions context bloat, lost env URLs, sessions pointing at the wrong environment, the memory file becoming a journal, or wanting to organize project context. Restructures or initializes a slim router-style memory file, a gitignored local env file for credentials, a topical docs/ tree, and a housekeeping protocol that keeps the structure from rebloating."
+description: "Use when a project's project memory file is over ~300 lines, when starting a new project from scratch, or when the user mentions context bloat, lost env URLs, sessions pointing at the wrong environment, the memory file becoming a journal, or wanting to organize project context. Restructures or initializes a slim router-style memory file, a gitignored local env reference file, a topical docs/ tree, and a housekeeping protocol that keeps the structure from rebloating."
 version: 2.0.0
 author: Alejandro Del Villar
 license: MIT

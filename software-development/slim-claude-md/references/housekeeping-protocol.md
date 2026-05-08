@@ -2,7 +2,7 @@
 
 **You are responsible for keeping the docs tree current.** The whole point of slimming this file was to push reference material into topical files; that only works if those files stay fresh. After every session that changes something material, do the following before the user wraps up (or when writing the session recap):
 
-1. **Identify which doc(s) the change touched.** Use the "Where to find things" map above. Changes to a feature → the matching `docs/features/*.md`. New script → `docs/scripts/README.md`. Connection-string change or rotated credential → `CLAUDE.local.md`. Schema change → `docs/architecture/database.md`.
+1. **Identify which doc(s) the change touched.** Use the "Where to find things" map above. Changes to a feature → the matching `docs/features/*.md`. New script → `docs/scripts/README.md`. Env var name change or credential rotation (in hosting dashboard) → update `CLAUDE.local.md` to reference the new env var name. Schema change → `docs/architecture/database.md`.
 
 2. **Update the relevant doc inline.** Don't leave the new fact only in a session recap. Recaps are journal entries; topical docs are the source of truth. A recap that says "added X" without updating the corresponding doc is a future drift bug.
 
@@ -15,7 +15,7 @@
    - The "Today's state" bullets need a refresh (every few sessions, or after a significant change).
    - **Never** add narrative changelogs, "Updated YYYY-MM-DD" markers, or feature deep-dives directly here. Those belong in topical docs + recaps.
 
-5. **`CLAUDE.local.md` updates require care.** It's gitignored, so changes leave no trace in `git log`. When you add or rotate a credential or URL, **mention it in the session recap**: e.g. "Updated CLAUDE.local.md: rotated production DB password." That recap line is the only trace of the change in git history.
+5. **`CLAUDE.local.md` updates require care.** It's gitignored, so changes leave no trace in `git log`. When you add or rotate an env var name reference or service URL, **mention it in the session recap**: e.g. "Updated CLAUDE.local.md: rotated production DB password via Railway dashboard." That recap line is the only trace of the change in git history.
 
 5a. **Contract docs (`TECHNICAL-DOCUMENTATION.md`, `FUNCTIONAL-SPECIFICATIONS.md`) must stay in sync with code.** When finishing work on a feature, update the matching section of the technical and functional contracts. The recap workflow prompts for this explicitly. Never declare a feature done while these contracts are stale — track the gap as a known debt in the recap if you must defer.
 
