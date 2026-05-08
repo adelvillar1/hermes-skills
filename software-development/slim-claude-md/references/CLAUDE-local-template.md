@@ -77,9 +77,9 @@ DATABASE_URL="<staging-url>" <migration-command>
 -->
 
 ```
-<!-- ANTHROPIC_API_KEY=sk-ant-api03-... -->
-<!-- STRIPE_SECRET_KEY=sk_live_... -->
-<!-- RESEND_API_KEY=re_... -->
+<!-- ANTHROPIC_API_KEY=your-api-key-here -->
+<!-- STRIPE_SECRET_KEY=your-api-key-here -->
+<!-- RESEND_API_KEY=your-api-key-here -->
 ```
 
 ---
@@ -92,7 +92,7 @@ DATABASE_URL="<staging-url>" <migration-command>
 -->
 
 ```
-<!-- github_pat_... -->
+<!-- GITHUB_TOKEN=your-token-here -->
 ```
 
 ---
