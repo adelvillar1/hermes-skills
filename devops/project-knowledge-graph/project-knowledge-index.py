@@ -446,6 +446,37 @@ def get_stats() -> dict:
 
     return stats
 
+# ── Delete ───────────────────────────────────────────────────────────────
+
+def delete_chunks(project=None, doc_type=None, all_chunks=False):
+    """Delete chunks by project, type, or all."""
+    db = get_falkordb()
+    g = db.select_graph(GRAPH_NAME)
+    if all_chunks:
+        cypher = "MATCH (c:Chunk) DETACH DELETE c RETURN count(c) as cnt"
+        params = {}
+    else:
+        conds, params = [], {}
+        if project:
+            conds.append("c.project = $project")
+            params["project"] = project
+        if doc_type:
+            conds.append("c.type = $type")
+            params["type"] = doc_type
+        if not conds:
+            print("Specify --project, --type, or --all")
+            return 0
+        cypher = "MATCH (c:Chunk) WHERE " + " AND ".join(conds) + " DETACH DELETE c RETURN count(c) as cnt"
+    try:
+        r = g.query(cypher, params=params)
+        n = r.result_set[0][0] if r.result_set else 0
+        label = "all" if all_chunks else " ".join(f"{k}={v}" for k, v in params.items())
+        print(f"Deleted {n} chunks ({label})")
+        return n
+    except Exception as e:
+        print(f"Delete failed: {e}")
+        return 0
+
 # ── Doctor ──────────────────────────────────────────────────────────────
 
 def doctor():
@@ -521,6 +552,12 @@ def main():
     # doctor
     subparsers.add_parser("doctor", help="Check environment and connectivity")
 
+    # delete
+    delete_parser = subparsers.add_parser("delete", help="Delete chunks from the graph")
+    delete_parser.add_argument("--project", "-p", help="Delete all chunks for a project")
+    delete_parser.add_argument("--type", "-t", help="Delete all chunks of a type (recap, plan, skill, claude, architecture)")
+    delete_parser.add_argument("--all", action="store_true", help="Delete ALL chunks")
+
     args = parser.parse_args()
 
     if args.command == "index":
@@ -569,6 +606,13 @@ def main():
 
     elif args.command == "doctor":
         doctor()
+
+    elif args.command == "delete":
+        if not args.project and not args.type and not args.all:
+            print("Specify --project, --type, or --all to delete chunks")
+        else:
+            delete_chunks(project=args.project, doc_type=getattr(args, "type", None),
+                          all_chunks=args.all)
 
     else:
         parser.print_help()

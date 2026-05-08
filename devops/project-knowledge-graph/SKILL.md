@@ -268,6 +268,20 @@ docker run -d --restart=unless-stopped -p 127.0.0.1:16379:6379 -v knowledge-grap
 python3 ~/.hermes/scripts/project-knowledge-index.py index
 ```
 
+Or use the `delete` command for targeted removal without stopping the container:
+
+```bash
+# Delete all chunks for a specific project
+python3 ~/.hermes/scripts/project-knowledge-index.py delete --project CI
+
+# Delete all chunks of a specific type across all projects
+python3 ~/.hermes/scripts/project-knowledge-index.py delete --type recap
+
+# Delete all chunks (rebuild from scratch)
+python3 ~/.hermes/scripts/project-knowledge-index.py delete --all
+python3 ~/.hermes/scripts/project-knowledge-index.py index
+```
+
 ### Stop the service (keep data)
 
 ```bash
@@ -301,7 +315,7 @@ python3 ~/.hermes/scripts/project-knowledge-index.py index
 ## CLI Reference
 
 ```
-usage: knowledge index|query|stats|doctor
+usage: knowledge index|query|stats|doctor|delete
 
 Commands:
   index       Scan and index all project documents
@@ -316,6 +330,11 @@ Commands:
   stats       Show corpus statistics (chunks per project/type)
 
   doctor      Check environment and connectivity
+
+  delete      Delete chunks from the graph
+              --project, -p    Delete all chunks for a project
+              --type, -t       Delete all chunks of a type
+              --all            Delete ALL chunks (equivalent to docker volume purge)
 ```
 
 ## Indexed Document Types
