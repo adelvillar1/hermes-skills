@@ -47,11 +47,11 @@ This skill **uses** `slim-claude-md` templates as its foundation for CLAUDE.md a
 | `slim-claude-md/references/CLAUDE.md.template` | Always — base for project CLAUDE.md |
 | `slim-claude-md/references/CLAUDE.local.md.template` | Always — base for project CLAUDE.local.md |
 | `slim-claude-md/references/housekeeping-protocol.md` | Always — inlined into CLAUDE.md |
-| `references/CLAUDE.md.template.simple` | When user picks 2-env topology |
-| `references/CLAUDE.md.template.full` | When user picks 3-env topology |
-| `references/TECHNICAL-DOCUMENTATION.md.template` | Always |
-| `references/FUNCTIONAL-SPECIFICATIONS.md.template` | Always |
-| `references/docs-plans-README.md.template` | Always — written into `docs/plans/README.md` |
+| `references/CLAUDE-template-simple.md` | When user picks 2-env topology |
+| `references/CLAUDE-template-full.md` | When user picks 3-env topology |
+| `references/TECHNICAL-DOCUMENTATION-template.md` | Always |
+| `references/FUNCTIONAL-SPECIFICATIONS-template.md` | Always |
+| `references/docs-plans-README-template.md` | Always — written into `docs/plans/README.md` |
 
 ---
 
@@ -122,7 +122,7 @@ In this case, the methodology scaffolding (CLAUDE.md, docs/, contracts) lives at
 ### 4. Write CLAUDE.md
 
 - Read `slim-claude-md/references/CLAUDE.md.template` as base.
-- Read `references/CLAUDE.md.template.simple` or `references/CLAUDE.md.template.full` (or skip for `single-branch`) for topology-specific rules.
+- Read `references/CLAUDE-template-simple.md` or `references/CLAUDE-template-full.md` (or skip for `single-branch`) for topology-specific rules.
 - Substitute placeholders: `{{PROJECT_NAME}}`, `{{ONE_LINE_DESCRIPTION}}`, `{{PRODUCTION_URL}}`, `{{REPO_URL}}`, `{{DEFAULT_BRANCH}}`, branch table rows.
 - Inline housekeeping protocol from `slim-claude-md/references/housekeeping-protocol.md`.
 - **Cross-repo dependency**: If the project depends on another project's data (question #9), add a "Data source" section after "Common commands" documenting the dependency, the access pattern (read-only), and a hard rule prohibiting schema changes or writes to that database. Reference the source project's CLAUDE.local.md for connection strings.
@@ -159,17 +159,17 @@ After any workspace change, delete `node_modules` + `package-lock.json` and rege
 
 ### 7. Write TECHNICAL-DOCUMENTATION.md
 
-Read `references/TECHNICAL-DOCUMENTATION.md.template`, substitute project facts, write to project root. The template includes section scaffolding (Tech Stack, Architecture, Database Schema, API Reference, Auth, Scripts, Deployment) so the user fills in as the project grows. Each section is intentionally short and references the matching `docs/` file.
+Read `references/TECHNICAL-DOCUMENTATION-template.md`, substitute project facts, write to project root. The template includes section scaffolding (Tech Stack, Architecture, Database Schema, API Reference, Auth, Scripts, Deployment) so the user fills in as the project grows. Each section is intentionally short and references the matching `docs/` file.
 
 **Note on stateless projects:** If the project has no database (e.g., file-upload dashboards, static sites), the template's "Database Schema" section will say "N/A — stateless". This is correct — don't try to invent a schema.
 
 ### 8. Write FUNCTIONAL-SPECIFICATIONS.md
 
-Read `references/FUNCTIONAL-SPECIFICATIONS.md.template`, substitute project facts, write to project root. Includes section scaffolding (Authentication, User Flows, Features, Admin, Edge Cases) with the same short-and-link approach.
+Read `references/FUNCTIONAL-SPECIFICATIONS-template.md`, substitute project facts, write to project root. Includes section scaffolding (Authentication, User Flows, Features, Admin, Edge Cases) with the same short-and-link approach.
 
 ### 9. Write docs/plans/README.md
 
-Read `references/docs-plans-README.md.template`, write to `docs/plans/README.md`. Explains the plan-as-contract convention, the ISO date filename format (`YYYY-MM-DD-<slug>.md`), plan template structure, and how to use `draft-feature-plan`.
+Read `references/docs-plans-README-template.md`, write to `docs/plans/README.md`. Explains the plan-as-contract convention, the ISO date filename format (`YYYY-MM-DD-<slug>.md`), plan template structure, and how to use `draft-feature-plan`.
 
 ### 10. Write empty stubs
 
