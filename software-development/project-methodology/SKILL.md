@@ -36,10 +36,10 @@ triggers:
 security:
   scope:
     persistence:
-      - "Reads CLAUDE.md, docs/recaps/*.md, docs/plans/*.md, docs/architecture/*.md, docs/features/*.md, TECHNICAL-DOCUMENTATION.md, FUNCTIONAL-SPECIFICATIONS.md"
+      - "Reads project memory files (e.g. .md), docs/recaps/*.md, docs/plans/*.md, docs/architecture/*.md, docs/features/*.md, TECHNICAL-DOCUMENTATION.md, FUNCTIONAL-SPECIFICATIONS.md"
       - "Reads git log and git status to verify post-recap work"
       - "Writes recap files to docs/recaps/ and plan files to docs/plans/"
-      - "Modifies CLAUDE.md 'Today's state' section when stale"
+      - "Modifies project memory file 'Today's state' section when stale"
       - "Modifies plan file frontmatter (status, updated date) on completion"
   safety:
     - "Never auto-commits — all file writes are explicitly reviewed by the user"
@@ -170,7 +170,7 @@ Then ask: **"What do you want to work on?"**
 - **Reading every file** — only read files matching the user's stated task
 - **Pasting secrets** — never paste values from CLAUDE.local.md
 - **Stale plan statuses** — before any response that enumerates plan statuses, re-read the plan files (not cached memory)
-- **False-positive CLAUDE.md finds** — `/opt/homebrew/CLAUDE.md` is Homebrew, not a project
+- **False-positive file finds** — `/opt/homebrew/CLAUDE.md` is Homebrew, not a project
 
 ---
 
@@ -365,13 +365,13 @@ ls -t docs/recaps/*.md 2>/dev/null | head -1
 
 If no recap was written (trivial session), note it.
 
-### 2. Check CLAUDE.md freshness
+### 2. Check project memory file freshness
 
 ```bash
 wc -l CLAUDE.md
 ```
 
-If >300 lines, suggest a slim-claude-md pass.
+If >300 lines, suggest a CLAUDE.md organization pass.
 
 ### 3. Check for uncommitted changes
 
@@ -403,7 +403,7 @@ into the next session's warmup state summary as open follow-ups.
 python3 ~/.hermes/scripts/project-knowledge-index.py index 2>/dev/null
 ```
 
-This picks up the new recap, updated plans, modified CLAUDE.md, and any
+This picks up the new recap, updated plans, modified project memory file content, and any
 new or changed skills.
 
 ### 7. Drift checks
@@ -423,7 +423,7 @@ A one-paragraph summary of what the next session should pick up:
 ### Wrapup pitfalls
 
 - **Don't auto-commit.** The user controls commits.
-- **Don't skip drift checks.** A CLAUDE.md that grew to 400 lines or a
+- **Don't skip drift checks.** A project memory file that grew to 400 lines or a
   local.md that accidentally became tracked will bite the next session.
 - **Wrapup is lightweight.** If the user is done, a quick status check
   and the next-session preview is sufficient. Don't over-engineer it.
@@ -455,7 +455,7 @@ grep -riE '^##? ' docs/technical-documentation.md docs/functional-specifications
 # Check git status
 git status --short
 
-# Check CLAUDE.md size
+# Check project memory file size
 wc -l CLAUDE.md
 ```
 
@@ -478,7 +478,7 @@ Transition rules:
 ```
 project/
 ├── CLAUDE.md                    # Slim router — hard rules, pointers, today's state
-├── CLAUDE.local.md              # Gitignored — credentials, URLs (NEVER commit)
+├── CLAUDE.local.md              # Gitignored — credentials, URLs (never commit)
 ├── docs/
 │   ├── recaps/                  # Session recaps — SESSION-RECAP-YYYY-MM-DD.md
 │   ├── plans/                   # Feature plans — YYYY-MM-DD-slug.md
