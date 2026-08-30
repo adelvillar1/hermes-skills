@@ -1,0 +1,46 @@
+# Minimal Clean Dashboard Template
+
+A ~500-line single-file dashboard template for FastAPI + vanilla JS projects.
+Copy this as the starting point when rebuilding or creating a new dashboard.
+
+## Structure
+
+- CSS custom properties for design tokens
+- Grid layout: sidebar + main
+- 7 view types: ratings table, scenarios cards, divergence table, schedule matchups, pipeline status, domains JSON, corpus stats
+- State object (single source of truth)
+- localStorage persistence for filters
+- Skeleton loading states
+- Toast error notifications
+- Mobile responsive (hamburger + overlay)
+- HTML escaping on all dynamic content
+
+## Usage
+
+1. Copy to `ui/dashboard.html`
+2. Adjust API endpoints in the `render*` functions to match your backend
+3. Adjust CSS custom properties to match your design system
+4. Add/remove views by modifying the sidebar nav items and `loadView` switch
+
+## Key Design Decisions
+
+1. **Single file** — No build step, no module bundler. Just save and refresh.
+2. **State object** — One `const state = {...}` at the top. Everything reads from it.
+3. **Render functions return void** — They read from `state` and write to `content.innerHTML`.
+4. **No global event handlers on dynamic content** — Use event delegation or inline `onclick` for simple cases.
+5. **API_BASE = ''** — Assumes same-origin. Change to `http://localhost:8000` for cross-origin dev.
+6. **EscapeHtml is mandatory** — Every template literal with dynamic data uses `escapeHtml()`.
+
+## Extending
+
+- **Add a view:** Add sidebar button with `data-view="newview"`, add case to `loadView()`, write `renderNewView()` function.
+- **Add a filter:** Add input to topbar, update `buildQuery()`, read in render functions.
+- **Add a chart:** Include a lightweight chart lib (e.g., Chart.js from CDN) in `<head>`, add canvas element in render function.
+
+## Anti-Patterns to Avoid
+
+- Don't scatter state variables — use the single `state` object
+- Don't hardcode active states in templates — interpolate from `state`
+- Don't attach event listeners to elements inside template literals — they get destroyed on re-render
+- Don't mix mock and real data in the same file — backend should handle fallback
+- Don't let the file grow past ~800 lines — split into multiple HTML files or add a build step
