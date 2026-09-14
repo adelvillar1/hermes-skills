@@ -1,7 +1,7 @@
 # Agent Skills — curated by Alejandro Del Villar
 
 A curated subset of my cross-harness **SKILL.md skill library** — one source of truth
-(kept private) symlink-synced across Hermes Agent, Claude Code, Codex, Kimi, WorkBuddy, and more.
+(kept private) symlink-synced across multiple AI coding agents.
 Every skill here was extracted from real production workflows across SaaS products I build.
 
 ## Skills
@@ -86,13 +86,12 @@ Every skill here was extracted from real production workflows across SaaS produc
 | [`web-design-guidelines`](creative/web-design-guidelines/SKILL.md) | Audit UI code against Vercel Web Interface Guidelines. |
 | [`wireframe-prototyping`](creative/wireframe-prototyping/SKILL.md) | Create wireframes and prototypes for fast UX validation. |
 
-### Development (5)
+### Development (4)
 
 | Skill | Description |
 |---|---|
 | [`design-reference-intake`](development/design-reference-intake/SKILL.md) | Evaluate design sources; fold their knowledge into skills. |
 | [`output-skill`](development/output-skill/SKILL.md) | Enforce full AI output; ban placeholders, lazy truncation. |
-| [`patch-tool-safe-editing`](development/patch-tool-safe-editing/SKILL.md) | Use when patching files. Fuzzy matches can corrupt content. |
 | [`runtime-bug-discovery-via-test-run`](development/runtime-bug-discovery-via-test-run/SKILL.md) | |
   After implementing a scraper, ETL job, or any feature that touches the database,
   run it against real data immediately as par… |
@@ -192,14 +191,14 @@ Every skill here was extracted from real production workflows across SaaS produc
 | [`write-pickup-runbook`](skills/write-pickup-runbook/SKILL.md) | Use when a session ends and the next session needs a forward-looking handoff document. The pickup runbook is the cold-start guide … |
 | [`write-session-recap`](skills/write-session-recap/SKILL.md) | Draft a structured session recap at docs/recaps/SESSION-RECAP-YYYY-MM-DD.md after a working session. Detects what changed via git,… |
 
-### Software Development (50)
+### Software Development (88)
 
 | Skill | Description |
 |---|---|
 | [`api-performance-optimization`](software-development/api-performance-optimization/SKILL.md) | Use when optimizing HTTP API page-load or response latency for a production service. Covers the full loop: baseline measurement (c… |
 | [`api-security-review`](software-development/api-security-review/SKILL.md) | API code review: TOCTOU, IDOR, identifier-normalization lockout, nosniff, FK, zod bounds. |
+| [`apple-reminders`](software-development/apple-reminders/SKILL.md) | Apple Reminders via remindctl: add, list, complete. |
 | [`approval-interpretation`](software-development/approval-interpretation/SKILL.md) | Distinguish between guardrails that require user initiative vs. commands that are themselves explicit approval. Prevents bureaucra… |
-| [`approved-design-parity`](software-development/approved-design-parity/SKILL.md) | Use when implementing anything from an approved artifact. |
 | [`apscheduler-background-vs-async`](software-development/apscheduler-background-vs-async/SKILL.md) | Use BackgroundScheduler for long-running CLI processes (no running event loop needed); use AsyncIOScheduler only when you already … |
 | [`audience-portal-build`](software-development/audience-portal-build/SKILL.md) | Add a role-facing portal (member/customer) to an admin app. |
 | [`bilateral-api-contracts`](software-development/bilateral-api-contracts/SKILL.md) | Build a bilateral bridge between TypeScript Zod schemas and Python Pydantic + SQLAlchemy. Covers the full pattern: shared enums, P… |
@@ -207,29 +206,52 @@ Every skill here was extracted from real production workflows across SaaS produc
 | [`branch-sync-protocol`](software-development/branch-sync-protocol/SKILL.md) | >
   Prevents silent code divergence across branches with independent worktrees.
   When a fix is applied to one branch but not the … |
+| [`brand-palette-migration`](software-development/brand-palette-migration/SKILL.md) | Extract brand colors from assets; migrate UI tokens. |
+| [`browser-automation`](software-development/browser-automation/SKILL.md) | Browser automation for web research, data extraction, and. |
+| [`catan-board-game`](software-development/catan-board-game/SKILL.md) | Rules, strategy, expansions, and history of Catan. |
+| [`cdp-browser-driving`](software-development/cdp-browser-driving/SKILL.md) | Drive web apps over raw Chrome CDP without Playwright. |
+| [`cdp-live-scene-capture`](software-development/cdp-live-scene-capture/SKILL.md) | Capture WebGL frames via Chrome CDP without Playwright. |
+| [`cipa-coppa-school-platform`](software-development/cipa-coppa-school-platform/SKILL.md) | Navigate CIPA and COPPA duties for a school platform. |
+| [`cloud-agent-pr-review`](software-development/cloud-agent-pr-review/SKILL.md) | Review/merge PRs from a second (cloud) agent instance. |
+| [`codebase-survey`](software-development/codebase-survey/SKILL.md) | Survey an existing codebase to understand its structure,. |
 | [`cold-email-deliverability`](software-development/cold-email-deliverability/SKILL.md) | Use when sending cold/outbound email at scale. |
 | [`cold-email-outreach-deliverability`](software-development/cold-email-outreach-deliverability/SKILL.md) | Build cold email outreach that lands in the inbox. |
 | [`credential-hygiene`](software-development/credential-hygiene/SKILL.md) | Move/redact secrets; scan tracked files for leaks. |
 | [`cross-boundary-evidence-tracing`](software-development/cross-boundary-evidence-tracing/SKILL.md) | Trace env/creds across process boundaries. |
 | [`debug-issue`](software-development/debug-issue/SKILL.md) | Use when debugging bugs, regressions, or unexpected behavior in a codebase. Systematically traces issues using the knowledge graph… |
+| [`design-an-interface`](software-development/design-an-interface/SKILL.md) | Generate multiple interface designs and compare them. |
+| [`design-resource-distillation`](software-development/design-resource-distillation/SKILL.md) | Distill external design sources into our skill library. |
 | [`domain-chunked-ai-generation`](software-development/domain-chunked-ai-generation/SKILL.md) | Use when an LLM struggles with too many output fields (8+) in a single tool call. Split the work into concurrent scoped calls (one… |
 | [`email-password-auth`](software-development/email-password-auth/SKILL.md) | Zero-dep email/password auth for Next.js + Prisma apps. |
 | [`es-module-bare-identifier-trap`](software-development/es-module-bare-identifier-trap/SKILL.md) | >
   Diagnose ReferenceErrors from bare global identifiers in ES modules.
   When extracting code from an IIFE or non-module context… |
+| [`existing-codebase-methodology-retrofit`](software-development/existing-codebase-methodology-retrofit/SKILL.md) | Retrofit methodology files to current standards. |
 | [`external-spec-to-execution-plan`](software-development/external-spec-to-execution-plan/SKILL.md) | Translate a complete external technical design document into a codebase-specific execution plan. Use when the user provides a fini… |
 | [`extract-local-package`](software-development/extract-local-package/SKILL.md) | Extract a coherent set of files from an application directory into a local package (or package subdirectory) and fix internal impo… |
 | [`fastapi-response-cache`](software-development/fastapi-response-cache/SKILL.md) | Add a Starlette/FastAPI HTTP response cache middleware for sport- or tenant-scoped read endpoints. Caches full response bodies wit… |
 | [`fastapi-static-dashboard`](software-development/fastapi-static-dashboard/SKILL.md) | Build a FastAPI backend that serves a vanilla-JS dashboard from static files. Covers module import issues (pip install -e .), Stat… |
+| [`findmy`](software-development/findmy/SKILL.md) | Track Apple devices/AirTags via FindMy.app on macOS. |
+| [`github`](software-development/github/SKILL.md) | GitHub via gh CLI: PRs, issues, reviews, repos, auth. |
+| [`hyperframes-expert`](software-development/hyperframes-expert/SKILL.md) | HyperFrames expertise: docs map, conventions, and pitfalls. |
 | [`inference-asset-guardian`](software-development/inference-asset-guardian/SKILL.md) | |
   Treat inferred/cached/generated assets as expensive, non-throwaway resources.
   Every inference costs time and money; poorly p… |
+| [`legacy-iife-to-es-modules`](software-development/legacy-iife-to-es-modules/SKILL.md) | Migrate a single-file vanilla-JS application (one giant I. |
 | [`llm-render-with-canonical-numbers`](software-development/llm-render-with-canonical-numbers/SKILL.md) | Use an LLM to write natural-language prose around a machine-computed number, with a guard that prevents the LLM from contradicting… |
+| [`macos-app-removal`](software-development/macos-app-removal/SKILL.md) | Use when fully removing a macOS app or agent CLI. |
+| [`macos-computer-use`](software-development/macos-computer-use/SKILL.md) | Drive the macOS desktop in the background — screenshots,. |
 | [`macos-shortcuts`](software-development/macos-shortcuts/SKILL.md) | Add global and local keyboard shortcuts to a macOS SwiftUI app using NSEvent.globalMonitor and CommandGroup. |
+| [`mcp-server-authoring`](software-development/mcp-server-authoring/SKILL.md) | Author MCP servers with the SDK - tools, transports, zod. |
+| [`methodology-retrofit`](software-development/methodology-retrofit/SKILL.md) | Patch methodology predating the current skill standard. |
 | [`mobile-design-system`](software-development/mobile-design-system/SKILL.md) | Implement a design system in a React Native / Expo mobile app: theme creation, shared components, screen-by-screen migration, and … |
+| [`multiplayer-ws-browser-smoke`](software-development/multiplayer-ws-browser-smoke/SKILL.md) | Use when browser-smoke-testing a multiplayer WS app. |
 | [`nextjs-dashboard-modernization`](software-development/nextjs-dashboard-modernization/SKILL.md) | Modernize legacy dashboard applications (vanilla JS + server-side rendering) to Next.js + TypeScript + Tremor/Recharts with a main… |
+| [`ocr-code-review`](software-development/ocr-code-review/SKILL.md) | Set up and run the alibaba/open-code-review `ocr` CLI. |
+| [`opencode`](software-development/opencode/SKILL.md) | Delegate coding to OpenCode CLI (features, PR review). |
 | [`paired-agent-pr-review`](software-development/paired-agent-pr-review/SKILL.md) | Review PRs from a paired cloud agent (agent/* branches). |
-| [`plan`](software-development/plan/SKILL.md) | Plan mode: write markdown plan to .hermes/plans/, no exec. |
+| [`parallel-implementation-safety`](software-development/parallel-implementation-safety/SKILL.md) | Keep parent and subagent writers from race-corrupting sha. |
+| [`plan-backlog-generation`](software-development/plan-backlog-generation/SKILL.md) | Generate a complete, dependency-ordered plan backlog for. |
 | [`plan-execution-preparation`](software-development/plan-execution-preparation/SKILL.md) | When moving from a draft plan to active execution, scope it precisely and gather data-model answers before writing code. Prevents … |
 | [`ponytail`](software-development/ponytail/SKILL.md) | >
   Forces the laziest solution that actually works, simplest, shortest, most
@@ -245,18 +267,33 @@ Every skill here was extracted from real production workflows across SaaS produc
 | [`prisma-date-range-query`](software-development/prisma-date-range-query/SKILL.md) | Use when building date-range filters in Prisma queries against PostgreSQL DATE columns. Covers the endOfDay UTC trick to prevent o… |
 | [`prisma-nested-orderby`](software-development/prisma-nested-orderby/SKILL.md) | Sort Prisma query results by related entity fields (nested orderBy) and dynamic sort direction. Covers the relational sort syntax,… |
 | [`project-wrapup`](software-development/project-wrapup/SKILL.md) | Use when wrapping up a working session — verifies the handoff to the next session is clean. Checks for existing recap, stale proje… |
+| [`python-local-dev-server`](software-development/python-local-dev-server/SKILL.md) | Start, restart, and troubleshoot local Python development. |
+| [`railway-internal-db-access`](software-development/railway-internal-db-access/SKILL.md) | Run ad-hoc scripts and queries against a Railway service'. |
 | [`react-admin-export-analytics`](software-development/react-admin-export-analytics/SKILL.md) | Use when adding CSV export or charts to a React admin UI. |
 | [`react-native-patterns`](software-development/react-native-patterns/SKILL.md) | Reusable React Native UI patterns — SectionList refactors, selection mode, animated FABs, carousel components. Reference library f… |
 | [`react-spa-api-client`](software-development/react-spa-api-client/SKILL.md) | Wire a React SPA to a session-cookie REST API. |
+| [`reddit-reading`](software-development/reddit-reading/SKILL.md) | Read Reddit: subreddits, search, threads, users. No browser. |
 | [`review-changes`](software-development/review-changes/SKILL.md) | Use when performing a structured code review on recent changes. Performs risk-aware review using change detection, impact analysis… |
+| [`rss-feeds`](software-development/rss-feeds/SKILL.md) | Read RSS, Atom, JSON feeds; discover feeds behind a page. |
+| [`ship-blueprints`](software-development/ship-blueprints/SKILL.md) | Use when working on ship blueprint SVGs. |
+| [`simplify-code`](software-development/simplify-code/SKILL.md) | Parallel 4-agent cleanup of recent code changes. |
+| [`songwriting-and-ai-music`](software-development/songwriting-and-ai-music/SKILL.md) | Songwriting craft and Suno AI music prompts. |
+| [`spa-seo`](software-development/spa-seo/SKILL.md) | Use when improving SEO on a client-rendered SPA static site. |
 | [`streaming-llm-response-reliability`](software-development/streaming-llm-response-reliability/SKILL.md) | Use when a streaming LLM chat hangs or dies silently. |
 | [`swiftui-macos-app`](software-development/swiftui-macos-app/SKILL.md) | Build macOS apps with SwiftUI, GRDB.swift, ScreenCaptureKit, CoreAudio, and EventKit. Covers Swift 6 concurrency strictness, GRDB+… |
 | [`swiftui-macos-design-system`](software-development/swiftui-macos-design-system/SKILL.md) | Build a centralized token-driven design system for SwiftUI macOS apps — colors, typography, spacing, components, and platform-spec… |
 | [`tailwind-css-class-verification`](software-development/tailwind-css-class-verification/SKILL.md) | Verify Tailwind CSS classes exist in the production build before claiming a UI element is done. Catches silently purged arbitrary-… |
 | [`tailwind-v4-hover-media-gating`](software-development/tailwind-v4-hover-media-gating/SKILL.md) | Use when gating Tailwind v4 hover behind media queries. |
+| [`test-driven-development`](software-development/test-driven-development/SKILL.md) | TDD: enforce RED-GREEN-REFACTOR, tests before code. |
+| [`timeline-verification`](software-development/timeline-verification/SKILL.md) | Use when dating a project milestone for a factual answer. |
 | [`tool-hooks`](software-development/tool-hooks/SKILL.md) | Pre/post tool call hooks — event-driven guards that fire before and after specific tool calls. Catches mistakes early (secrets, ty… |
+| [`touchdesigner-mcp`](software-development/touchdesigner-mcp/SKILL.md) | Control TouchDesigner via twozero MCP. |
+| [`ui-implementation-review`](software-development/ui-implementation-review/SKILL.md) | Use after building a UI feature to systematically audit t. |
+| [`visual-output-verification`](software-development/visual-output-verification/SKILL.md) | Build visual output. Verify with screenshots, never assume. |
 | [`webhook-signature-verification`](software-development/webhook-signature-verification/SKILL.md) | Receive and verify HMAC-signed webhooks from third-party providers (Stripe, GitHub, Slack, Shopify, etc.) in any web framework. Th… |
 | [`worker-durable-handoff`](software-development/worker-durable-handoff/SKILL.md) | Completion-driven durable handoff records between worker services in a shared-DB monorepo. |
+| [`writing-plans`](software-development/writing-plans/SKILL.md) | Write implementation plans: bite-sized tasks, paths, code. |
+| [`ws-room-wire-testing`](software-development/ws-room-wire-testing/SKILL.md) | Wire-test WebSocket room servers with real clients. |
 | [`zod-schema-patterns`](software-development/zod-schema-patterns/SKILL.md) | Use when writing or extending shared zod validation schemas. |
 
 ## Install any skill

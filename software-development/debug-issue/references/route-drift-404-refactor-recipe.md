@@ -68,10 +68,10 @@ from src.services.auth import create_access_token, get_user_by_email, create_use
 from src.services.corpus import ensure_mc_tables, ensure_users_table, ensure_user_favorites_table
 
 ensure_mc_tables(); ensure_users_table(); ensure_user_favorites_table()
-user = get_user_by_email("admin@test.com")
+user = get_user_by_email("admin@example.com")
 if not user:
-    create_user(email="admin@test.com", password="<test-password>", role="admin", display_name="Test Admin")
-    user = get_user_by_email("admin@test.com")
+    create_user(email="admin@example.com", password="test-password", role="admin", display_name="Test Admin")
+    user = get_user_by_email("admin@example.com")
 
 token = create_access_token({"sub": user["id"], "email": user["email"], "role": user["role"]})
 c = TestClient(app)

@@ -5,7 +5,7 @@
 #
 # Usage:
 #   history_report.sh <owner/repo> [branch]
-#   history_report.sh adelvillar1/cruise-intelligence main
+#   history_report.sh owner/repo main
 #
 # Requires: gh (authenticated), standard POSIX tools.
 set -euo pipefail

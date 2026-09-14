@@ -201,7 +201,7 @@ ffmpeg -y \
   output.mp4
 ```
 
-**Mix rules (proven in Pampa Wine Club promo v3):**
+**Mix rules (proven in a restaurant promo video):**
 - Voice: 100% volume, delayed 1.5s (let video establish first)
 - Music: 18% volume, 2s fade-in, 1.5s fade-out ending at video_length - 1.5s
 - TTS duration must be < video_duration - 1s (prevents cutoff)

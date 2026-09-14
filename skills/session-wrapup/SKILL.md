@@ -177,7 +177,7 @@ broken=$(find ~/.hermes/skills ~/.claude/skills -maxdepth 1 -type l ! -exec test
 
 - If the canonical library has uncommitted changes: commit them (`chore: sync skills library — <what changed>`) and push, then verify with `git ls-remote origin refs/heads/main` (SSH; the gh REST token is unreliable for recently-created repos).
 - If a session-created skill is Hermes-locked (references delegate_task, cronjob, mnemosyne, kanban, or `hermes <subcommand>` CLI), it belongs in `~/.hermes/skills/` only — never commit it to `~/.agents/skills` (see the `skills-meta-library` skill for the classification scan and full workflow).
-- If symlinks are broken or a harness was touched manually, run `bash ~/.agents/skills/sync-skills.sh` — it relinks hermes/claude, merge-imports WorkBuddy, and reports broken links. **Never run `npx skills add ... -a '*'` as a substitute** — its reconcile step deletes agent-dir entries it doesn't manage and would wipe the Hermes-locked skills.
+- If symlinks are broken or a harness was touched manually, run `bash ~/.agents/skills/sync-skills.sh` — it relinks hermes/claude, merge-imports the desktop-agent copy, and reports broken links. **Never run `npx skills add ... -a '*'` as a substitute** — its reconcile step deletes agent-dir entries it doesn't manage and would wipe the Hermes-locked skills.
 - Report in the wrap-up summary: skills committed/pushed, or "skills library clean".
 
 ### 9. Drift check

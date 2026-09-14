@@ -172,7 +172,7 @@ const Auth = {
 |----------|----------|---------|-------------|
 | `JWT_SECRET` | Recommended | auto-generated | HS256 signing key. Set for consistency across restarts. |
 | `JWT_EXPIRATION_HOURS` | No | `168` (7 days) | Token lifetime |
-| `ADMIN_PASSWORD` | Yes (first deploy) | — | Seeds `adelvillar@gmail.com` as admin on startup |
+| `ADMIN_PASSWORD` | Yes (first deploy) | — | Seeds `admin@example.com` as admin on startup |
 | `ADMIN_SEED` | No | — | Comma-separated `email:password` pairs for additional admins |
 | `ADMIN_API_KEY` | No | — | Legacy API key for `X-API-Key` header fallback |
 

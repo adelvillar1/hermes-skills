@@ -2,7 +2,7 @@
 
 Handoffs and phase plans routinely assert prerequisites: "use `api.reservations.create()`, which exists in api.ts", "the X helper already handles Y". These claims are written from the authoring session's *belief* about what it left behind — planned, documented, or half-landed work reads the same as shipped work in a recap.
 
-## Real case (2026-07-31, pampa-wineclub Phase 6b)
+## Real case (2026-07-31, wine-club Phase 6b)
 
 The phase instruction directed the next session to wire the landing page to `api.reservations.create()` and `api.reservations.availability()`, "which exist in api.ts". They did not — the `reservations` group in api.ts had only `list`/`adminCreate`/`update`/`remove`. The backend routes they'd wrap did exist, so the claim was directionally right, operationally false. The receiving session caught it by reading api.ts before writing dependent code, made a minimal additive fix, and flagged the deviation in its report.
 
