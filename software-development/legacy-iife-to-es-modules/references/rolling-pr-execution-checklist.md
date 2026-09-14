@@ -2,7 +2,7 @@
 
 The pattern observed across PR3.1–PR3.8 + PR4 of `docs/plans/2026-06-10-frontend-modular-refactor.md` (extracting 13 views, ~150-650 LOC each, all using the same architecture). Use this checklist when dispatching the next micro-PR in a similar series.
 
-## Per-PR dispatch template (paste into `subagent dispatch` `context`)
+## Per-PR dispatch template (paste into `delegate_task` `context`)
 
 ```
 Background: This is PR3.N of the modular dashboard refactor. PR3.1-3.N-1 (commits <list>) all succeeded. Apply the same pattern to <view> view.
@@ -102,10 +102,10 @@ grep -n "globalThis\.<view>\|globalThis\.render<View>" ui/js/dashboard.js \
 # 8. Visual QA — controller does this directly, NOT via subagent
 # (subagent visual QA failed repeatedly because the browser's auth
 # session expired between subagent turns)
-#   a. Navigate to login.html, log in as admin@example.com / test-password
+#   a. Navigate to login.html, log in as admin@test.com / adminpass1
 #   b. Navigate to dashboard.html
 #   c. Click the <View> button in the sidebar
-#   d. your screenshot tool to confirm content rendered
+#   d. browser_vision to confirm content rendered
 #   e. browser_console to confirm 0 errors
 
 # 9. Commit and push
@@ -134,8 +134,8 @@ git push origin main
 
 Observed in PR3.3 (Scenarios) and PR3.4 (Divergence): the subagent's
 visual QA step failed because the browser's auth session expired
-between the subagent's `subagent dispatch` turn and the visual-QA step.
-The subagent would `try { login('admin@example.com', ...); ... } catch
+between the subagent's `delegate_task` turn and the visual-QA step.
+The subagent would `try { login('admin@test.com', ...); ... } catch
 { failed }` and report "visual QA incomplete." The controller had
 to re-do the visual QA anyway. Save the round-trip: have the
 controller do the visual QA directly. Subagent handles file

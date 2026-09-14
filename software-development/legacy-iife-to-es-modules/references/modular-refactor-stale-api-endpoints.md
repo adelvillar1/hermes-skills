@@ -54,4 +54,4 @@ Also update any sub-endpoints (e.g. `/api/pipeline/corpus/{table}/sample` → `/
 
 ## Real example
 
-the ELO scenario lab, 2026-06-15: the modular refactor PR extracted `domains.js` and `corpus.js` into `ui/js/views/`. Both still called `/api/pipeline/*`, but the only backend routes were `/api/admin/domains`, `/api/admin/corpus`, and `/api/admin/corpus/{table}/sample`. The admin Domains and Corpus pages showed empty data with 404s in the network tab. The fix updated four files: the two views, the backend `get_domains` handler to cover all 15 sports, and the corresponding `tests/test_api.py` expectation.
+ELO Scenario Lab, 2026-06-15: the modular refactor PR extracted `domains.js` and `corpus.js` into `ui/js/views/`. Both still called `/api/pipeline/*`, but the only backend routes were `/api/admin/domains`, `/api/admin/corpus`, and `/api/admin/corpus/{table}/sample`. The admin Domains and Corpus pages showed empty data with 404s in the network tab. The fix updated four files: the two views, the backend `get_domains` handler to cover all 15 sports, and the corresponding `tests/test_api.py` expectation.

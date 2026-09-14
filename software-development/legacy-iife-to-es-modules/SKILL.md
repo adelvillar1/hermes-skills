@@ -1,12 +1,13 @@
 ---
 name: legacy-iife-to-es-modules
-description: Migrate a single-file vanilla-JS application (one giant I.
+title: Refactor a Legacy IIFE Monolith to ES Modules
+description: Migrate a single-file vanilla-JS application (one giant IIFE or a tower of `<script>` tags) into multiple ES-module files WITHOUT a build step and WITHOUT rewriting call sites that span the module/IIFE boundary. Covers the dual-export bridge pattern, twelve specific pitfalls that break it (the IIFE hoisted-block recursion that causes "Maximum call stack size exceeded", strict-mode bare-identifier references, post-migration bare Auth.authFetch instead of api() wrapper, the load-order dynamics between modules and the legacy IIFE, and forgetting to register a new lib module in the _modulePromises loader array), and the IIFE-body-via-dynamic-import fallback when the standard module load order fails.
 triggers:
-- User says "extract this into modules" or "split this monolithic JS file" or "convert to ES modules"
-- Project has a single multi-thousand-line .js file (typically loaded via `<script src=...>`) that needs modularization
-- Refactor plan calls for moving sections of one big file into separate files
-- Codebase uses a non-module pattern (IIFE, var, top-level const) that needs to coexist with new ES modules
-- Multiple `onclick="..."` handlers or template-literal event handlers reference functions by bare name
+  - User says "extract this into modules" or "split this monolithic JS file" or "convert to ES modules"
+  - Project has a single multi-thousand-line .js file (typically loaded via `<script src=...>`) that needs modularization
+  - Refactor plan calls for moving sections of one big file into separate files
+  - Codebase uses a non-module pattern (IIFE, var, top-level const) that needs to coexist with new ES modules
+  - Multiple `onclick="..."` handlers or template-literal event handlers reference functions by bare name
 ---
 
 # Refactor a Legacy IIFE Monolith to ES Modules
@@ -381,7 +382,7 @@ TypeError: globalThis.signalBarsHTML is not a function
 
 This TypeError cascades — it kills the entire view render. No game cards show. The page is blank.
 
-**Real example (2026-06-16, the ELO scenario lab):** A new `ui/js/lib/signalBars.js` module was created with the correct dual-export pattern (`globalThis.signalBarsHTML = signalBarsHTML`). It was used by `today.js` and `schedule.js` via `globalThis.signalBarsHTML(...)`. But the module was never added to `_modulePromises` in `dashboard.js`. The module file existed on disk, was served correctly by the static file server, but was never imported by anything. Result: `TypeError` on page load, all game cards disappeared.
+**Real example (2026-06-16, ELO Scenario Lab):** A new `ui/js/lib/signalBars.js` module was created with the correct dual-export pattern (`globalThis.signalBarsHTML = signalBarsHTML`). It was used by `today.js` and `schedule.js` via `globalThis.signalBarsHTML(...)`. But the module was never added to `_modulePromises` in `dashboard.js`. The module file existed on disk, was served correctly by the static file server, but was never imported by anything. Result: `TypeError` on page load, all game cards disappeared.
 
 **The fix:**
 
@@ -422,7 +423,7 @@ When you move a view out of the IIFE into `ui/js/views/`, the module often copie
 
 **Prevention:** During any view extraction, grep the source for `api(`, `fetch(`, `Auth.authFetch(` and record the URLs. Before merge, compare that list to the backend router. Add a `TestClient` regression test that asserts the endpoint exists and returns the shape the view consumes.
 
-See `references/modular-refactor-stale-api-endpoints.md` for the full 2026-06-15 the ELO scenario lab case study.
+See `references/modular-refactor-stale-api-endpoints.md` for the full 2026-06-15 ELO Scenario Lab case study.
 
 ## The "load order" debug recipe
 
@@ -684,20 +685,20 @@ This was Pitfall 10 Variant C in the earlier version of this skill; it has been 
 - **Forgetting that `<script type="module" src="...">` in `<body>` (not `<head type="module">`) is rejected by some sandboxes** — use the dynamic-import-in-IIFE approach from Pitfall 3 universally.
 - **Building the `window.dashboard` namespace with shorthand property syntax** — `window.dashboard = { setLeague, ... }` — fails because the bare identifiers no longer exist in IIFE scope. Use `window.dashboard = { setLeague: globalThis.setLeague, ... }` instead.
 - **Calling helper functions that the IIFE still has locally** — e.g. `els.X` where `els` is a cached Proxy from the new dom-refs.js module. Make sure `els` is the new Proxy, not a leftover from the old `const els = { ... }` in the IIFE.
-- **Subagent creates the new view file but doesn't remove the originals from the monolith** — This happened in 3 of 9 dispatches during the the ELO scenario lab refactor. The subagent writes the full `ui/js/views/xyz.js` with all functions and `globalThis.X = X`, but times out before deleting the corresponding functions from `dashboard.js`. The result: duplicate function declarations (IIFE-local and module) with the same name. In non-strict mode V8 this is not an error — the later declaration wins — but if the later one is the IIFE stub, you get Pitfall 7 (infinite recursion). **Always verify the monolith actually shrank** after a subagent reports completion. If `wc -l dashboard.js` didn't change, the subagent only did 80% of the job.
+- **Subagent creates the new view file but doesn't remove the originals from the monolith** — This happened in 3 of 9 dispatches during the ELO Scenario Lab refactor. The subagent writes the full `ui/js/views/xyz.js` with all functions and `globalThis.X = X`, but times out before deleting the corresponding functions from `dashboard.js`. The result: duplicate function declarations (IIFE-local and module) with the same name. In non-strict mode V8 this is not an error — the later declaration wins — but if the later one is the IIFE stub, you get Pitfall 7 (infinite recursion). **Always verify the monolith actually shrank** after a subagent reports completion. If `wc -l dashboard.js` didn't change, the subagent only did 80% of the job.
 - **Extracting a function can surface latent infinite recursion in pre-existing code** — When `renderTopPicksSection` was extracted to `today.js`, the recursion guard `if (!honest.length) return renderTopPicksSection([], totalGamesScanned);` (which called itself with empty `[]`) caused "Maximum call stack size exceeded" in production. This bug existed in the original monolith but was never triggered because the data path didn't produce empty `honest` until the view was extracted and a new fetch path was introduced. **After extracting any function that has self-recursive calls, check whether the recursion has a proper base case.** Look for patterns like `return self(...)` with modified arguments that don't guarantee convergence.
 
 ## When to use this skill vs `refactor-safely`
 
 - **`refactor-safely`**: dependency-graph analysis, dead-code detection, planning a refactor. Use BEFORE starting.
 - **`legacy-iife-to-es-modules`**: implementation patterns and pitfalls. Use DURING the refactor.
-- **`a subagent-driven development workflow`**: methodology (warmup → plan → subagent dispatch → 2-stage review). Use to GOVERN the refactor.
+- **`subagent-driven-development`**: methodology (warmup → plan → delegate_task → 2-stage review). Use to GOVERN the refactor.
 
 This skill complements, does not replace, either of those.
 
 ## End-to-end worked example (PR1 → PR4, two sessions)
 
-The original the ELO scenario lab frontend modular refactor (`docs/plans/2026-06-10-frontend-modular-refactor.md`) extracted 7 lib modules (PR1) + 5 utility expansions (PR2) + 13 view modules (PR3.1–PR3.8 + PR4) from a 4,500-line `dashboard.js` IIFE. The full sessions that followed this skill's patterns are documented in:
+The original ELO Scenario Lab frontend modular refactor (`docs/plans/2026-06-10-frontend-modular-refactor.md`) extracted 7 lib modules (PR1) + 5 utility expansions (PR2) + 13 view modules (PR3.1–PR3.8 + PR4) from a 4,500-line `dashboard.js` IIFE. The full sessions that followed this skill's patterns are documented in:
 
 - `docs/recaps/SESSION-RECAP-2026-06-10-frontend-refactor-pr1.md` (PR1)
 - `docs/recaps/SESSION-RECAP-2026-06-10-frontend-refactor-pr2.md` (PR2)
@@ -719,5 +720,5 @@ The end result of the full refactor:
 - `references/format-js-pitfall-recipe.md` — full 2-hour debugging transcript for Pitfall 1, plus a 30-second diagnostic snippet to paste into DevTools after any IIFE→module refactor
 - `references/lazy-view-cache-and-truncated-template.md` — 2026-06-14 case study: missing league pills and a non-working More button caused by module-cache staleness + a corrupted template literal
 - `references/lazy-view-renderer-preload.md` — 2026-06-14 case study: team/match clicks did nothing because `navigateToTeam`/`restoreFromHash` called `globalThis.renderTeamDetail`/`showMatchDetail` before the lazy view modules were loaded
-- `references/rolling-pr-execution-checklist.md` — per-PR dispatch template, controller-level workflow, time budget, 8 lessons for executing 5+ view-extraction micro-PRs in sequence (the pattern that emerged during PR3.1–PR4 of the the ELO scenario lab refactor), and a one-shot "wrap-up audit" script that catches all the cleanup work the subagent is most likely to have missed
+- `references/rolling-pr-execution-checklist.md` — per-PR dispatch template, controller-level workflow, time budget, 8 lessons for executing 5+ view-extraction micro-PRs in sequence (the pattern that emerged during PR3.1–PR4 of the ELO Scenario Lab refactor), and a one-shot "wrap-up audit" script that catches all the cleanup work the subagent is most likely to have missed
 - `templates/dashboard-js-iife-wrapper.js` — copy-paste starting point for the monolith wrapper (Promise.all → IIFE → catch)

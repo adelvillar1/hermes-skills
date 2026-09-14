@@ -1,6 +1,6 @@
 # Pitfall: git stash for error attribution in shared/dirty worktrees
 
-**Date:** 2026-08-05 (wine-club campaign)
+**Date:** 2026-08-05 (pampa-wineclub campaign)
 
 ## Context
 

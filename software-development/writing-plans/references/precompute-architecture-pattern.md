@@ -187,7 +187,7 @@ def mc_simulate(sport, iterations):
 
 ## Worked example
 
-The the ELO scenario lab Monte Carlo plan uses this pattern:
+The ELO Scenario Lab Monte Carlo plan uses this pattern:
 
 | Component | Detail |
 |-----------|--------|

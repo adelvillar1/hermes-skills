@@ -1,6 +1,6 @@
 # Portal code patterns (known-good examples)
 
-Concrete, reusable patterns from a real member-portal build (a wine-club web app, React + react-router + scoped-CSS design system). Adapt names/paths to the target project.
+Concrete, reusable patterns from a real member-portal build (Pampa Wine Club, React + react-router + scoped-CSS design system). Adapt names/paths to the target project.
 
 ## 1. Proof/attachment photo behind an HttpOnly session cookie
 
@@ -52,10 +52,10 @@ function ProofModal({ delivery, onClose }: { delivery: MemberDelivery; onClose: 
 
 ## 2. Scoped brand stylesheet — sibling scope, identical tokens
 
-If the app already has a scoped brand CSS (e.g. `.club-home`), create a sibling file scoped under a new root class that re-declares the SAME token block so the portal feels like the same product. Every rule is prefixed with the scope so nothing leaks:
+If the app already has a scoped brand CSS (e.g. `.pampa-home`), create a sibling file scoped under a new root class that re-declares the SAME token block so the portal feels like the same product. Every rule is prefixed with the scope so nothing leaks:
 
 ```css
-.club-portal {
+.pampa-portal {
   --crimson: #c8102e;
   --crimson-dark: #9c0c23;
   --char: #14100e;
@@ -73,15 +73,15 @@ If the app already has a scoped brand CSS (e.g. `.club-home`), create a sibling 
   min-height: 100vh;
   position: relative;
 }
-/* grain / glow, buttons, cards, badges, tabs, modal — all under .club-portal … */
-.club-portal .btn { background: var(--crimson); /* …same as home .btn… */ }
+/* grain / glow, buttons, cards, badges, tabs, modal — all under .pampa-portal … */
+.pampa-portal .btn { background: var(--crimson); /* …same as home .btn… */ }
 ```
 
 Icon sizing/color goes in this CSS, NOT arbitrary-value Tailwind:
 
 ```css
-.club-portal .type-tile b svg { width: 15px; height: 15px; margin-right: 7px; vertical-align: -2px; color: var(--gold); }
-.club-portal .type-tile.couple b svg { color: var(--crimson); }
+.pampa-portal .type-tile b svg { width: 15px; height: 15px; margin-right: 7px; vertical-align: -2px; color: var(--gold); }
+.pampa-portal .type-tile.couple b svg { color: var(--crimson); }
 ```
 
 ## 3. Audience-scoped API types + auth register
@@ -137,7 +137,7 @@ navigate(u.role === 'admin' ? '/admin' : '/portal', { replace: true })
 
 ## 5. Self-service actions in an existing portal (cancel, status callout, profile edit)
 
-Patterns from adding self-cancel + pickup-ready + profile self-edit to the wine-club portal (2026-08-05). Backend endpoints already existed (`DELETE /api/events/:id/signup`, `PATCH /api/reservations/:id/cancel`, `PATCH /api/members/me`) — the work was UI wiring.
+Patterns from adding self-cancel + pickup-ready + profile self-edit to the Pampa portal (2026-08-05). Backend endpoints already existed (`DELETE /api/events/:id/signup`, `PATCH /api/reservations/:id/cancel`, `PATCH /api/members/me`) — the work was UI wiring.
 
 **Confirm → busyId → retry → inline error.** One busy flag per row; confirm before the destructive call; refetch on success; surface failures as a `role="alert"` banner at the top of the grid:
 

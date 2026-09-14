@@ -1,6 +1,6 @@
 # Lazy view modules must be loaded before global renderer callers
 
-**Project:** the ELO scenario lab  
+**Project:** ELO Scenario Lab  
 **Date:** 2026-06-14  
 **Related skill:** `legacy-iife-to-es-modules` (Pitfall 10)
 

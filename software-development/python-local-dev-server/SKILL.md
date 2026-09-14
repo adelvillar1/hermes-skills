@@ -1,6 +1,13 @@
 ---
 name: python-local-dev-server
-description: Start, restart, and troubleshoot local Python development.
+description: "Start, restart, and troubleshoot local Python development servers (FastAPI/Flask/Django). Covers dependency installation, port conflict resolution, zombie process cleanup, and health verification."
+version: 1.0.0
+author: Alejandro Del Villar
+license: MIT
+metadata:
+  hermes:
+    tags: [python, fastapi, uvicorn, flask, django, local-dev, server, port-conflict]
+    related_skills: [project-warmup, debug-issue]
 ---
 
 # Python Local Development Server
@@ -238,10 +245,10 @@ The terminal tool's heuristic may flag `pip install` or `pytest` as "long-lived 
 
 **Symptoms:** `terminal` returns: "This foreground command appears to start a long-lived server/watch process. Run it with background=true..." even for one-shot commands like `pip install fastapi uvicorn`.
 
-**Fix:** Use `your code-exec tool` with `subprocess.run(..., capture_output=True)` instead of `terminal` for commands that the tool misidentifies. Or append a non-matching suffix like `2>&1 | tail -5` to break the heuristic (fragile).
+**Fix:** Use `execute_code` with `subprocess.run(..., capture_output=True)` instead of `terminal` for commands that the tool misidentifies. Or append a non-matching suffix like `2>&1 | tail -5` to break the heuristic (fragile).
 
 ```python
-# Use your code-exec tool for pip installs when terminal misidentifies
+# Use execute_code for pip installs when terminal misidentifies
 import subprocess
 result = subprocess.run(
     ['pip', 'install', 'fastapi', 'uvicorn'],

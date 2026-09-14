@@ -1,10 +1,14 @@
 ---
 name: test-driven-development
-description: 'TDD: enforce RED-GREEN-REFACTOR, tests before code.'
-platforms:
-- linux
-- macos
-- windows
+description: "TDD: enforce RED-GREEN-REFACTOR, tests before code."
+version: 1.1.0
+author: Hermes Agent (adapted from obra/superpowers)
+license: MIT
+platforms: [linux, macos, windows]
+metadata:
+  hermes:
+    tags: [testing, tdd, development, quality, red-green-refactor]
+    related_skills: [systematic-debugging, writing-plans, subagent-driven-development]
 ---
 
 # Test-Driven Development (TDD)
@@ -280,7 +284,7 @@ Can't check all boxes? You skipped TDD. Start over.
 | Must mock everything | Code too coupled. Use dependency injection. |
 | Test setup huge | Extract helpers. Still complex? Simplify the design. |
 
-## the harness Integration
+## Hermes Agent Integration
 
 ### Running Tests
 
@@ -297,12 +301,12 @@ terminal("pytest tests/test_feature.py::test_name -v")
 terminal("pytest tests/ -q")
 ```
 
-### With subagent dispatch
+### With delegate_task
 
 When dispatching subagents for implementation, enforce TDD in the goal:
 
 ```python
-spawn_subagent(
+delegate_task(
     goal="Implement [feature] using strict TDD",
     context="""
     Follow test-driven-development skill:
@@ -333,14 +337,14 @@ Never fix bugs without a test.
 - **Happy path only** — always test edge cases, errors, and boundaries
 - **Brittle tests** — tests should verify behavior, not structure; refactoring shouldn't break them
 - **Cookie/session leakage in API test fixtures** — When testing cookie-based auth (httpOnly JWT, session cookies), session-scoped `TestClient` fixtures leak cookies between tests. An "unauthenticated" test that runs after an "authenticated" test will receive the previous test's cookie and return 200 instead of the expected 401. **Fix:** Use function-scoped fixtures (not session-scoped) for the `TestClient` itself, and inject auth cookies per-test via a separate fixture that sets `client.cookies.set("access_token", token)`. The DB setup/seeding can stay session-scoped, but the HTTP client must be per-test.
-- **TestClient silently passing auth tests for the wrong reason** — When the endpoint under test accepts MULTIPLE auth methods (cookie + `Authorization: Bearer` header, API key + JWT, etc.), a TestClient test that authenticates via method A will *also* send any prior method-A credentials via the cookie jar, so the test returns 200 even if method B is completely broken. The test passes, the suite passes, the bug ships to production. **Symptoms:** Task marked "auth wired up", `pytest tests/test_auth.py` green at 100%, but live `curl -H "Authorization: Bearer ..."` returns 401. **Fix pattern when extending an auth dependency to accept a new credential source:**
+- **TestClient silently passing auth tests for the wrong reason** — When the endpoint under test accepts MULTIPLE auth methods (cookie + `Authorization: *** header, API key + JWT, etc.), a TestClient test that authenticates via method A will *also* send any prior method-A credentials via the cookie jar, so the test returns 200 even if method B is completely broken. The test passes, the suite passes, the bug ships to production. **Symptoms:** Task marked "auth wired up", `pytest tests/test_auth.py` green at 100%, but live `curl -H "Authorization: Bearer ***"` returns 401. **Fix pattern when extending an auth dependency to accept a new credential source:**
   1. **Test each auth path in isolation with a fresh TestClient.** Don't reuse a client that has a cookie set earlier in the same test or in a session-scoped fixture.
   2. **Explicitly assert the OTHER path is absent.** For the header test, do `client.cookies.clear()` and pass no other headers. For the cookie test, omit the `Authorization` header.
   3. **Or: use two independent TestClient instances** — one per auth path — instead of clearing state on a shared client. This makes the isolation structural, not behavioral.
   4. **Treat TestClient auth tests as a soft signal.** Live curl (or another real HTTP client) is the hard signal. Any auth refactor that adds a new credential source needs live curl QA as part of acceptance criteria, the same way `clean install before push` is a hard rule for dependency changes.
   5. **The diagnostic that catches this fast:** write a curl that exercises ONLY the new auth path against a freshly-started server. If the new path returns 200, the code works. If it returns 401/403, the test suite's green is misleading you.
 
-  **Case study (2026-06-10, the ELO scenario lab):** Task 1.3 was "return `access_token` in login response so CLI can use `Authorization: Bearer`." The TestClient test asserted this worked. Suite went green at 100%. The bug: `get_current_user` only accepted the httpOnly cookie. TestClient was sending both, and the cookie path returned 200, masking that the header path was dead. Live curl at the end of the sprint caught it. The principle: **if your test fixture is the one sending both auth methods, your test cannot tell which one the response was authenticated with.**
+  **Case study (2026-06-10, elo-scenario-lab):** Task 1.3 was "return `access_token` in login response so CLI can use `Authorization: ***" The TestClient test asserted this worked. Suite went green at 100%. The bug: `get_current_user` only accepted the httpOnly cookie. TestClient was sending both, and the cookie path returned 200, masking that the header path was dead. Live curl at the end of the sprint caught it. The principle: **if your test fixture is the one sending both auth methods, your test cannot tell which one the response was authenticated with.**
 
 - **Test env never reaches the production code path — the "empty test data" trap.** When the test environment has no real corpus data (empty SQLite, no seeded evidence_items, no market odds, no player stats), endpoints with an early-return guard like `if not games or not ratings: return empty report` exit before the real code runs. Your test passes, but production 500s on the first request with real data — because the code path your test never executed is broken. This is the most common reason "passes all tests, fails in prod" surprises ship.
 
@@ -367,7 +371,7 @@ Never fix bugs without a test.
   - Any time the test SQLite is much smaller than production Postgres
   - Any time a code path was added recently (in this PR or a recent one) — those are the paths test coverage is most likely to have missed
 
-  **Real case (2026-06-10, the ELO scenario lab):** `test_accuracy_mlb` and friends all passed at 200 because the test DB had no completed games. The NBA branch of `/api/accuracy/{sport}` had an `UnboundLocalError` on `team_stats` (loaded after the engine-seeding block referenced it). Production got 500 on every NBA request. Fix: added `test_accuracy_nba_does_not_500` that mocked `corpus.async_load_completed_games`, `async_load_ratings_for_prediction`, `async_load_player_stats_aggregated` to return a minimal 1-game NBA dataset. The test failed with the exact `UnboundLocalError` from production, then passed after hoisting the `team_stats` load. The "monkeypatch the corpus" pattern is reusable for any production-only code path.
+  **Real case (2026-06-10, elo-scenario-lab):** `test_accuracy_mlb` and friends all passed at 200 because the test DB had no completed games. The NBA branch of `/api/accuracy/{sport}` had an `UnboundLocalError` on `team_stats` (loaded after the engine-seeding block referenced it). Production got 500 on every NBA request. Fix: added `test_accuracy_nba_does_not_500` that mocked `corpus.async_load_completed_games`, `async_load_ratings_for_prediction`, `async_load_player_stats_aggregated` to return a minimal 1-game NBA dataset. The test failed with the exact `UnboundLocalError` from production, then passed after hoisting the `team_stats` load. The "monkeypatch the corpus" pattern is reusable for any production-only code path.
 
   **The meta-rule:** if your test fixture is the empty case, your test cannot tell whether the populated case works. Force the populated case with mocked data.
 

@@ -1,6 +1,6 @@
 # Consumer-First Label Mappings
 
-Field-by-field mapping tables for common cruise-industry entities. Use these when writing plans that surface PG data in the the companion mobile app mobile app.
+Field-by-field mapping tables for common cruise-industry entities. Use these when writing plans that surface PG data in the Cruiser Intelligence mobile app.
 
 ## Principles
 

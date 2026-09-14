@@ -1,10 +1,14 @@
 ---
 name: simplify-code
-description: Parallel 4-agent cleanup of recent code changes.
-platforms:
-- linux
-- macos
-- windows
+description: "Parallel 4-agent cleanup of recent code changes."
+version: 1.1.0
+author: Hermes Agent (inspired by Claude Code /simplify)
+license: MIT
+platforms: [linux, macos, windows]
+metadata:
+  hermes:
+    tags: [code-review, cleanup, refactor, delegation, subagent, parallel, simplify]
+    related_skills: [requesting-code-review, test-driven-development]
 ---
 
 # Simplify Code — Parallel Review & Cleanup
@@ -77,12 +81,12 @@ before proceeding.
 
 ### Phase 2 — Launch four reviewers in parallel
 
-Use `subagent dispatch` **batch mode** — pass all four tasks in one `tasks`
+Use `delegate_task` **batch mode** — pass all four tasks in one `tasks`
 array so they run concurrently. Four is the right fan-out for this pattern;
 it's within the `delegation.max_concurrent_children` budget on any default
 install.
 
-**No delegation available?** If you can't call `subagent dispatch` in this
+**No delegation available?** If you can't call `delegate_task` in this
 context (you're a leaf subagent, delegation is disabled, or the budget is
 exhausted), do NOT skip the review or drop angles. Work through all four
 reviewer angles yourself, sequentially, in this context — same search
@@ -237,7 +241,7 @@ Wait for all four to return (batch mode returns them together).
   note, not folded into cleanup fixes. Correctness review is a different
   pass with different verification standards.
 - **Respect project conventions.** If the repo has AGENTS.md / CLAUDE.md /
-  AGENT.md (the project memory file) or a linter config, fold those rules into the reviewer prompts so
+  HERMES.md or a linter config, fold those rules into the reviewer prompts so
   suggestions match house style instead of fighting it.
 - **Large diffs blow context.** If the diff is huge, scope it down before
   delegating — four subagents each carrying a 5000-line diff is expensive and
@@ -259,7 +263,7 @@ Wait for all four to return (batch mode returns them together).
 
 ## Related
 
-If your install has the `a subagent-driven development workflow` skill (optional), it
+If your install has the `subagent-driven-development` skill (optional), it
 covers the complementary case: parallel review *during* implementation, per
 task. This skill is the standalone *after-the-fact* cleanup pass. Use
 `requesting-code-review` for the pre-commit security/quality gate — that's

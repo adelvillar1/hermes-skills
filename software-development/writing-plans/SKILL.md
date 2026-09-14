@@ -1,6 +1,14 @@
 ---
 name: writing-plans
-description: 'Write implementation plans: bite-sized tasks, paths, code.'
+description: "Write implementation plans: bite-sized tasks, paths, code."
+version: 2.1.0
+author: Alejandro Del Villar
+license: MIT
+metadata:
+  hermes:
+    homepage: https://github.com/adelvillar1
+    tags: [planning, design, implementation, workflow, documentation]
+    related_skills: [subagent-driven-development, test-driven-development, requesting-code-review, project-knowledge-graph]
 ---
 
 # Writing Implementation Plans
@@ -18,7 +26,7 @@ Assume the implementer is a skilled developer but knows almost nothing about the
 **Always use before:**
 - Implementing multi-step features
 - Breaking down complex requirements
-- Delegating to subagents via a subagent-driven development workflow
+- Delegating to subagents via subagent-driven-development
 
 **Don't skip when:**
 - Feature seems simple (assumptions cause bugs)
@@ -63,7 +71,7 @@ Every plan MUST start with:
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For the harness:** Use a subagent-driven development workflow to implement this plan task-by-task.
+> **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -133,7 +141,7 @@ Read and understand:
 
 ### Step 2: Explore the Codebase
 
-Use the harness tools to understand the project:
+Use Hermes tools to understand the project:
 
 ```python
 # Understand project structure
@@ -356,8 +364,8 @@ When a feature requires matching changes on both sides (new API endpoint + new U
 
 After saving the plan, **dispatch the first subagent immediately**. Do NOT ask "shall I proceed?" — if the user said "plan and implement it" or "and then build it," that's an unambiguous chain. Project memory captures this user-style rule explicitly: when the instruction is unambiguous, the next response is tool calls, not questions.
 
-When executing, use the `a subagent-driven development workflow` skill:
-- Fresh `subagent dispatch` per task with full context
+When executing, use the `subagent-driven-development` skill:
+- Fresh `delegate_task` per task with full context
 - Spec compliance review after each task
 - Code quality review after spec passes
 - Proceed only when both reviews approve
@@ -418,7 +426,7 @@ Plans that stay `status: active` after all work is done create false positives d
 
 ### When to audit plan status
 
-- **During warmup** — check `the harness plans dir/` or `docs/plans/` for any `status: active` plans and verify they're still in progress.
+- **During warmup** — check `.hermes/plans/` or `docs/plans/` for any `status: active` plans and verify they're still in progress.
 - **When the user says "I thought we finished X"** — audit the plan's ACs against current code.
 - **Before session wrapup** — if any plan's work was confirmed complete this session, close it now.
 
@@ -696,7 +704,7 @@ Large multi-phase plans (e.g., a 7-phase T6 staleness cleanup) benefit from **tw
 1. **Parent plan** at `docs/plans/YYYY-MM-DD-<slug>.md` — describes the overall approach, phases, ACs at the *outcome* level, risks, links to references. Read by humans reviewing the strategy. Stays stable across execution revisions.
 2. **Execution plan** at `docs/plans/YYYY-MM-DD-<slug>-execution.md` (or similar suffix) — bite-sized tasks with file paths, complete code, exact verification commands. Read by subagents. Gets updated as tasks complete.
 
-**Why split:** the parent plan's "Phase 2: cross-persona backfill of 1,740 truly-missing pairs" reads cleanly to a stakeholder. The execution plan's "Task 2: create `scripts/insights/deprecate-stale-t6.ts` with this exact Prisma SQL..." reads cleanly to a subagent. Combining them produces a 270-line doc that serves neither audience well, and revisions (e.g., changing the LLM provider from DeepSeek to the LLM provider) require touching both strategy and code sections.
+**Why split:** the parent plan's "Phase 2: cross-persona backfill of 1,740 truly-missing pairs" reads cleanly to a stakeholder. The execution plan's "Task 2: create `scripts/insights/deprecate-stale-t6.ts` with this exact Prisma SQL..." reads cleanly to a subagent. Combining them produces a 270-line doc that serves neither audience well, and revisions (e.g., changing the LLM provider from DeepSeek to Ollama) require touching both strategy and code sections.
 
 **Cross-references:** the parent plan links to the execution plan in its "Files to be Touched" or "Implementation" section. The execution plan's frontmatter cites the parent (`parent_plan: docs/plans/...`).
 
@@ -722,7 +730,7 @@ This is the "two parallel waves with a verification gate between them" pattern. 
 | 3 (read-only audit) | Medium | Spec + quality |
 | ... | ... | ... |
 
-See `a subagent-driven development workflow/references/risk-based-review-rigor.md` for the full classification rubric.
+See `subagent-driven-development/references/risk-based-review-rigor.md` for the full classification rubric.
 
 ### Production code is the deployed contract. The plan is an internal spec. When they disagree, production wins. Update the plan to match production, and add a note in the plan's "Lessons learned" or similar section so future sessions see what was corrected.
 
@@ -827,7 +835,7 @@ When the database has 40+ columns per entity, the instinct is to show them all. 
 
 > Do NOT show: builder, flag, registry port, propulsion type, build cost — these are travel-agent data points.
 
-**Reference:** `references/consumer-first-labels.md` — field-by-field label mapping tables for common cruise entities (ships, cruise lines, ports, itineraries). Load this when writing plans that surface PG data in the the companion mobile app mobile app.
+**Reference:** `references/consumer-first-labels.md` — field-by-field label mapping tables for common cruise entities (ships, cruise lines, ports, itineraries). Load this when writing plans that surface PG data in the Cruiser Intelligence mobile app.
 
 ## Remember
 
