@@ -17,7 +17,7 @@ Use when designing **recurring autonomous agent workflows** — cron jobs, watch
 ## The core contract
 
 1. **Never create a blind loop.** Before creating any recurring loop, verify a concrete way to observe its subject exists on the machine (logs, metrics, an MCP tool, a URL, a CLI like `gh`) and **smoke-test it once by hand**. If nothing can actually be observed, say so — do not create the loop. A loop with no verified read path is a lie on a schedule.
-2. **Quiet while healthy, speak up when it breaks.** The default report is *what changed*, not *everything is fine*. A run that finds nothing stays silent (Hermes cron: `no_agent=True` script with empty stdout = silent watchdog).
+2. **Quiet while healthy, speak up when it breaks.** The default report is *what changed*, not *everything is fine*. A run that finds nothing stays silent (Hermes cron: `no_agent=True` script with empty stdout = silent watchdog). A finding must name the artifact that closes it (exact path/filename to create or update); "X is stale" without a named fix costs the reader a second investigation and gets ignored.
 3. **Dated reports, not chatter.** Each run writes one dated `type: report` entry; report a run metric when one is natural. Never invent numbers — a failed read is reported MISSING, never written as 0.
 4. **Never scale silently, never kill silently.** Every verdict gets a date and a number.
 5. **The loop reads and judges, it does not act** (watches/verdicts) — unless it is explicitly a fix-shipper, in which case: **one provably safe PR per run**, fresh git worktree off main and outside the loop folder, never while a previous PR from the same loop is unmerged. Zero is a valid run.
