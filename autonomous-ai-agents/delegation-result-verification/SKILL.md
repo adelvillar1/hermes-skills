@@ -894,6 +894,18 @@ api_calls count. Read as a failure, this looks like the whole task was lost.
 6. If the job writes its index only at the end, a kill loses the whole run. Per-item artifacts
    (one file per target) are what make a long run salvageable; prefer a design that writes as it
    goes, and say so in the brief.
+7. **Measure throughput BEFORE launching, and size the run to the wall — do the arithmetic first.**
+   A tracked background process is not immortal: one whose full set needs longer than the runtime's
+   wall (observed once as a kill at ~3600s — `exit_code: -15`, `termination_source: agent_close`)
+   can NEVER finish, and relaunching it unchanged just burns the wall again and loses the same work.
+   The fix is arithmetic, not persistence. Run the job on a tiny sample with `--limit` and time it,
+   then multiply — measured here: 16 items in 47s at 8 workers (≈20/min), so 2,033 items needed
+   ~100 min, already past the wall before the first launch. Either raise `--workers` until the full
+   set fits, or make the job checkpoint and resume across runs. Establish this before spending an
+   hour discovering that it does not fit.
+8. **Launch long jobs through `terminal(background=true, notify=true)`.** The command guard rejects
+   shell-level background wrappers (`setsid`, `nohup`, `disown`), so detaching with a shell trick is
+   not an option — and a foreground run inside a subagent is exactly the pitfall above.
 
 **Prevention in the delegation brief:** state explicitly that the long batch is NOT the child's to
 run — "prove the pipeline on a small sample, print one complete output for review, then hand back
