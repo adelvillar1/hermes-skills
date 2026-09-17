@@ -202,6 +202,87 @@ The full implementation (Python + FastAPI + DeepSeek LLM + Jinja-style template)
 
 The bug this fixed: a user's team detail page showed "Rays are sliding — 82 points in 10 games" while the stat tile showed -47 for the 7-day delta. After the fix, both cite the same -47 number, and the LLM can decorate the prose without breaking the contract.
 
+## Variant: prose grounded in a verified RECORD, not a computed number
+
+The same pattern applies when the "canonical" thing is not a number but a fixed **record of
+verified facts** — a career history, a spec, a product's documented capabilities — and the LLM is
+asked to write first-person or descriptive prose from it. The risk profile changes: it is no longer
+"the prose contradicts the tile," it is "the prose asserts something that is not in the record."
+That matters most when a human will say it out loud or act on it.
+
+**The guard must check more than numbers.** Extract every NUMBER (percentages, currency, counts,
+years, headcounts) and every PROPER NOUN or acronym from the generated prose, and require each to
+appear in the source record. A numbers-only guard passes prose that invents an employer, a tool, or
+a certification — exactly the claims a reader is most likely to take at face value and least likely
+to check.
+
+**Maintain an explicit deny-list for facts the record contradicts.** Absence checks catch invented
+facts; they do not catch a *plausible* fact the record actively rules out. If the record shows a
+non-held credential, a language not spoken, or a degree not earned, assert those negatives
+explicitly — an ordinary absence check will happily pass "PMP-certified" because the string does
+not appear anywhere in either direction.
+
+**Retry once with the violations, then fall back — never ship unverified prose.** On failure, re-ask
+the writer naming the exact violations. If it fails again, emit the raw supporting source lines
+under the heading instead of the prose, and mark the entry as ungrounded so the fallback is visible
+rather than silent. The reader then sees true material that is merely less polished, which is always
+better than fluent prose they cannot rely on.
+
+**Emit an explicit no-support state instead of padding.** When the record genuinely cannot answer
+what was asked, say so in the output and leave the field empty. Do not let the writer bridge the gap
+with generic competence language. A partial document whose gaps are labelled is more useful than a
+complete-looking one whose gaps are filled with invention — and the labelled gaps tell the reader
+where to gather more source material.
+
+**The writer is not the verifier.** The validator must be deterministic code reading the source
+record, never the same model asked whether it stayed grounded. A model that invented a fact is not
+a reliable judge of whether it invented it. Note the rejection rate the same way as the numeric
+guard — a rising rate means the prompt or the record has drifted.
+
+**Reasoning-model writers need the budget checked, not just set.** A model that emits reasoning
+tokens before content can spend the whole `max_tokens` allowance on reasoning and return EMPTY
+content with `finish_reason: length` — which reads as a parsing bug and is not one. Check
+`finish_reason` on every writer call and escalate the budget on `length` rather than accepting or
+misreporting an empty answer.
+
+**Separate EVIDENCE from CAPABILITY RATINGS.** A self-assessed skills matrix, proficiency grid, or
+competency self-rating is not evidence — it is a claim about the subject. Keep ratings out of the
+evidence layer entirely. A rating may LICENSE a claim once evidence supports it, but a rating must
+never GENERATE content on its own: that yields fluent prose sourced from a number nobody can check.
+Expect this to bite exactly where a rating has no backing anywhere else in the record.
+
+**Classify SALIENCE, not just truth.** A fact can be true and minor. Grade every evidence item
+`headline` (quantified, standalone), `supporting` (true but generic, metricless), or `incidental`
+(appears only as a subordinate clause inside a larger statement). The failure this prevents is
+INFLATION, which no fact-checking guard can catch: fluent prose that promotes a clause like
+"…while managing vendor partners…" into a headline achievement. Incidental items must never stand as
+a standalone answer — they may appear only as supporting detail inside a real headline story.
+
+**Infer capabilities from evidence, but GRADE the inference and let the human confirm it.** One
+achievement does entail further capabilities — whoever led a large platform migration necessarily
+did vendor governance, contract negotiation and risk management. Ask the entailment as a judgement
+over a FIXED vocabulary (the subject's own skill list) and grade every result: `entailed` /
+`strongly_implied` / `plausible` / `not_implied`. Only the first two may become claims; route
+`plausible` to the human as an explicit confirmation queue. The subject is the authority on their
+own record — an inference accepted silently is indistinguishable from something invented.
+
+**Infer TOOLING from the ERA of the work, not from the evidence text.** A blanket "tools must be
+named or they do not count" rule is wrong and manufactures false findings: sustained practice in a
+discipline implies the standard tooling of that era, and achievement bullets routinely omit it. A
+CAPABILITY can be logically entailed by an achievement; a specific TOOL cannot. So infer the
+era-typical toolset from the DATES of the role and have the human confirm which they actually used.
+Check explicit mention first — a tool already named in the evidence needs no inference at all, and
+skipping that check both invents a gap that is not there and hides the ones that are.
+
+**Split PROVENANCE: publicly verifiable fact vs the subject's own attestation.** Mine the public
+record (press releases, filings, counterparty announcements) to replace generic claims with named,
+dated, quantified events — but record what that establishes (the event happened) separately from
+what only the subject can attest (their role in it). Two corollaries. A published announcement date
+is NOT a boundary on their involvement: project and deal work runs long before a release, so a
+non-public phase inside their tenure is expected, never suspicious. And non-public work is
+undiscoverable by any amount of research — ask for it, and mark it `attested` rather than dropping
+it from the record.
+
 ## References
 
 - `references/elo-scenario-lab-narrative-fix.md` — full worked example: prompt, code, tests
