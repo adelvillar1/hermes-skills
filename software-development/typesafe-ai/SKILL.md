@@ -119,6 +119,16 @@ Score: ordered array, 2-10 levels; Noul: optional `{true, false}` descriptions).
 
 ## Pitfalls
 
+- **Unknown question fields are dropped SILENTLY.** The question schema accepts only `type`,
+  `instructions` and `criteria`. A script that passed its payload as a separate `text` key got a
+  **200 OK** and 26 answers — all landing inside a 0.22-0.29 band, because every question in the
+  request was IDENTICAL. There is no error and no warning: a malformed question fails quietly and
+  the uniform answers look like a weak signal rather than missing data. Put the per-question content
+  INSIDE `instructions` (or `criteria`), and treat a suspiciously tight answer band as a data bug.
+- **Check the SPREAD, not just the values.** A batch of answers clustered within a few hundredths of
+  each other means the questions were not actually differentiated. Ranking 26 items whose scores span
+  0.02 is ranking noise. Measure `max - min` before trusting any ordering, and compare against a
+  single-item run of the same question as a control.
 - **Do not wrap the primitives in a composite you invented without measuring it.** A weighted
   composite built on top of System One answers can be WORSE than a single raw answer. Measured on a
   real JD-vs-candidate scoring task (n=771): the raw `relevance` Score correlated with two independent
