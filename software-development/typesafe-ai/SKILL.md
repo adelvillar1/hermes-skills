@@ -119,6 +119,23 @@ Score: ordered array, 2-10 levels; Noul: optional `{true, false}` descriptions).
 
 ## Pitfalls
 
+- **Do not wrap the primitives in a composite you invented without measuring it.** A weighted
+  composite built on top of System One answers can be WORSE than a single raw answer. Measured on a
+  real JD-vs-candidate scoring task (n=771): the raw `relevance` Score correlated with two independent
+  LLM judges at r=+0.64 / +0.73 and separated kept-vs-rejected items at 0.658, while a
+  0.65*relevance + 0.35*seniority composite scored r=+0.44 / +0.50 and separated at 0.631. The
+  composite lost information the primitive already carried. **Score the raw primitives against your
+  labels first; only add weights when they demonstrably help.**
+- **Guards must CAP, they must not sum.** A disqualifying question ("is hands-on build a primary
+  duty?") folded into a weighted average can be outvoted by a generous relevance reading, letting an
+  ineligible item clear the bar. Apply blockers as a `fit = min(fit, cap)` override and record which
+  one fired.
+- **Do not ask one holistic question to replace a whole rubric.** Documents that System One is for
+  judgments "a knowledgeable person makes in a second"; a single "rate this 0-10" over a long document
+  is exactly the broad question the docs say to decompose.
+- **Confidence is per-question, not per-request.** A high-confidence `role_family` can sit next to a
+  `primary_function` at 0.42. Read them individually; a low one on the question that drives the branch
+  is the signal to escalate, even when the others are confident.
 - **One question per request** is the most common mistake (coding agents default to it). It costs
   round trips for no benefit; batch them.
 - **Chaining questions in one request does not work.** Questions are independent — one answer is not
