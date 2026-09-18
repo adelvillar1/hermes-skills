@@ -166,6 +166,51 @@ Score: ordered array, 2-10 levels; Noul: optional `{true, false}` descriptions).
   back off with exponential backoff (SDKs do this automatically). Not a bug: a Score landing on a
   fractional value, or a Choice returning near-equal probabilities.
 
+## Access model — invite-only preview, NO BILLING MODE (2026-09-17)
+
+**TypeSafe is an invite-only preview. There is no way to buy credits.** This is load-bearing:
+when the API returns `HTTP 402` with
+
+```json
+{"detail":{"error_type":"billing_error","message":"Your organization has no available
+ TypeSafe API credits. Please add more credits and/or set up auto-reload at
+ https://console.typesafe.ai/settings/billing"}}
+```
+
+that message is MISLEADING — it points at a billing page that does not exist for a preview
+account. **I told a user to add credits and enable auto-reload; both were impossible.** A 402 here
+is TERMINAL: retrying, paying, and auto-reload are all unavailable. The only path back is asking
+TypeSafe to grant more preview credits.
+
+**Confirming it is credit exhaustion and NOT rate limiting** (the two are easy to confuse, and
+the distinction decides whether to wait or to re-plan):
+
+| Test | Credits out | Rate limited |
+|---|---|---|
+| Status code | **402** Payment Required | **429** Too Many Requests |
+| `Retry-After` / `X-RateLimit-*` headers | **absent** | always present |
+| Minimal 1-question call | fails identically | usually succeeds |
+| Repeat over ~10s | refuses EVERY time | recovers on a sliding window |
+| Error body | typed `error_type: billing_error` | typed rate-limit error |
+
+Also check `x-envoy-upstream-service-time`: a request answered in ~24ms and then refused was
+PROCESSED and rejected on account state; a throttled request is held or dropped instead. The API
+exposes **no balance endpoint** (`/v1/usage`, `/v1/credits`, `/v1/account`, `/v1/billing`, `/v1/me`
+all 404) — the only balance view is the console, which a preview account may not be able to fund.
+
+## Raise on terminal codes — never return an error sentinel callers ignore (2026-09-17)
+
+A client that returns `{"__error__": ...}` on failure is only safe if EVERY caller checks it. In a
+20-script pipeline, **none did** — so an exhausted account was indistinguishable from "the model
+found nothing to change": scripts ran to completion, exited 0, and rules silently stopped
+enforcing. The ERP/monotony rule was wired into a cron job running every 4 hours and would have
+quietly stopped discarding jobs while appearing healthy — the same failure class as a cache that
+reports success while serving stale results.
+
+**Raise a distinct exception on account-level codes (401/402/403) and reserve the sentinel for
+transient ones.** A terminal condition that a caller might ignore must not be returnable.
+
+
 ## Verification
 
 Prove the round trip before wiring anything: run the Quickstart request through the `terminal` tool
