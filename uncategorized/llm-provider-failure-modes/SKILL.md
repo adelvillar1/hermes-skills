@@ -166,9 +166,14 @@ line reported **`grounded 435/1565 (27.8%)` against an 80.2% baseline** — a 5x
 purely an infrastructure failure. Content that never got written cannot be grounded, so every
 transport failure was silently counted as a CONTENT verdict (`ungrounded`).
 
-**Recovery confirmed the diagnosis:** a raw probe minutes later returned **HTTP 200** with no config
-change — so 402 here was a TRANSIENT quota/billing state, not a revoked key. A 402 is not
-necessarily permanent; re-probe before concluding the account is dead.
+**Do NOT read a 402 as transient merely because a later probe succeeds.** I drew exactly that
+conclusion here and it was wrong. The probe returned 200 because a SMALL balance remained; the
+account then drained to zero under continued use and every subsequent call was refused. A 200 on a
+one-question probe proves the account is *fundable*, not funded. Before assuming a 402 can be cured
+by waiting or retrying, establish what the grant actually IS: if the provider has no self-serve
+billing (preview / invite-only / no card on file), a 402 is **TERMINAL** — nothing you can do
+restores it, and the only path back is the provider granting more. Treat the provider's own error
+text with suspicion too: it may recommend a billing page that does not exist for your account type.
 
 **Two things made this recoverable, and both are design requirements:**
 1. The per-item record stored the **rejection REASON**, not just the verdict — `violations:
@@ -188,6 +193,60 @@ the API directly with curl before re-running; (4) only then question the methodo
 
 **Concurrency note:** the same run also produced `HTTP 429: Too Many Requests` at 24 workers. Prefer
 the measured-safe concurrency for the provider; treat 402 and 429 as distinct (billing vs rate).
+
+## Consuming a scarce credit GRANT (2026-09-17)
+
+When credits are a **grant** rather than a purchase (preview/invite-only accounts, trial
+allocations with no card on file), the binding question is not "can I afford this call" but
+"what happens to the whole system when the grant reaches zero" — a drained account takes down
+EVERY consumer at once, including ones unrelated to whatever drained it.
+
+Measured cost: ~4,000 writer calls across two blanket runs (198 documents each, most never read)
+exhausted the grant AND simultaneously killed the small on-demand feature the user actually cared
+about. The expense was not the money — it was the denial of service to everything else.
+
+**1. Generate on demand; never blanket-sweep.** Producing N artifacts when a handful get read
+spends the grant on the N−k you will never open. Prefer a per-item trigger (button, request) over
+a batch. When the batch path must survive for rebuilds, make it **REFUSE by default** behind an
+explicit override flag rather than merely documenting that it is discouraged — a policy in prose
+gets paraphrased or skipped, a policy in a gate holds.
+
+**2. Gate every SCHEDULED consumer to a cadence, in the shared client.** A rule that re-judges a
+whole live set every few hours empties a grant on its own. Implement a marker-file interval gate
+(`.last_run_<consumer>` timestamp; skip when younger than N hours) **in the shared provider client
+so every consumer inherits it**, not in the orchestrator prompt — prompts are prose an agent may
+reorder or omit. Distinguish run-frequency from data-necessity: a 4-hourly discovery job does not
+imply every downstream rule needs re-judging 6× a day.
+
+Make the skip **exit 0 with a loud `SKIP (normal)` line**, so the orchestrator does not report a
+spurious failure and does not retry; state in the prompt that a skip is a success and that the
+bypass flag must never be used. Write the marker **only on successful completion**, so a failed or
+credit-starved run does not suppress the next real attempt for N hours. Interactive/on-demand paths
+should be exempt from the gate — by definition the user is spending credits on something wanted.
+
+**3. Never let a consumer silently no-op against a dead account.** A provider client that returns
+an error *sentinel* is only safe if every caller checks it; in a many-script pipeline, none do, so
+exhaustion becomes indistinguishable from "the model found nothing to change" — rules stop
+enforcing while exiting 0. Raise a distinct exception on account-level codes (401/402/403) and
+reserve the sentinel for transient failures. (Concrete implementation: see the `typesafe-ai`
+skill's "Raise on terminal codes" section.)
+
+**4. Changing the job prompt to document the gate — do it safely.** A cadence gate is only half
+implemented until the orchestrator knows a skip is expected, so the prompt must be edited. Job
+prompts are long single strings where a bad anchor silently eats whole sections:
+- **Back up the jobs file first, then `difflib.unified_diff` old vs new and confirm ONLY the intended
+  block changed.** Do not trust a successful write as evidence of a surgical edit.
+- **Watch for duplicate step numbering** when inserting a step — renumber so the sequence a reader
+  follows matches the sequence that executes.
+- **No restart is required.** The scheduler's due-scan reads the job store from disk on every scan
+  (`tick()` → `get_due_jobs()` → `load_jobs()`), so a prompt edit lands on the next tick within a
+  minute. Trace that call chain rather than restarting a gateway on a hunch — and never conclude an
+  edit "did not apply" without checking whether the tick actually fired.
+
+**Distinguishing an exhausted grant from rate limiting** decides whether to wait or re-plan:
+exhaustion is **402** with a typed billing error, no `Retry-After`/`X-RateLimit-*` headers, a
+minimal one-question call failing identically to a large one, and refusal on EVERY repeat; rate
+limiting is **429**, carries throttle headers, and recovers on a sliding window.
 
 ## Why these failure modes don't show in single-call tests
 
