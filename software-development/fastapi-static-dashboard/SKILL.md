@@ -237,6 +237,8 @@ See the Docker section below for the production Dockerfile pattern.
 | **Frontend render throws → the view looks dead, not broken** | Clicking a filter/tab updates the header but the list stays exactly as it was; no error anywhere; the view reads as empty or frozen | A throw inside `list.innerHTML = rows.map(...)` aborts BEFORE assignment, so the PREVIOUS DOM stays on screen and the failure is invisible. Wrap the row map in try/catch and render the error into the list. Never let a partial render masquerade as "this view has no rows" — that is the hardest kind of bug to find because nothing looks wrong. |
 | **New counter/badge defined but never rendered** | You added `const myStat = ...` for a new metric; the page shows nothing and there is no error | Defining the variable and adding `${myStat}` to the template are TWO separate edits — the variable exists, unused. Grep the file for `${` + the variable name, and confirm it on the LIVE page. A diff that looks correct is not evidence the badge rendered. |
 | **Server excludes a category the client filters itself** | A tab or view is permanently empty and its counter reads 0, with no error anywhere | If the client filters a category for display (e.g. `if (filter === 'all') return j.status !== 'archived'`), the server must still SERVE that category — the client was written to receive it. One owner per filter. Duplicated filtering ownership fails silently: the server hides rows the client expects. |
+| **A route hangs forever, for EVERY id including invalid ones** | Your new POST never returns; the paired status/progress route then hangs too; an unrelated route still answers fine; restarting the server fixes it until the next POST | A non-reentrant lock acquired twice — a `with LOCK:` block calling a helper that also takes `LOCK`. It deadlocks while HOLDING the lock, so everything that needs the lock queues behind it. Hanging identically for a valid and an INVALID id is the tell: it is blocked before it can validate. Fix: split into a `_locked` body + a wrapper, and call the `_locked` form inside locked blocks. |
+| **A list endpoint returns megabytes and the dashboard feels dead** | Page loads but the job/list area spins for seconds; the API is slow even on localhost, so it looks like a network or tunnel problem | List endpoints returning FULL long-text bodies (job descriptions, article text) blow up the payload: one such endpoint returned **4.75 MB / 3.3s for 773 rows** where a sibling returned 1.68 MB / 0.086s. The client downloads it on every load AND every poll. Strip the long bodies from the list response and fetch them when a row is expanded. Prove it is the payload, not the network, by timing the endpoint on localhost — if local is as slow as public, the transport is not the cause. |
 
 ## Data Pipeline Integration
 
@@ -484,6 +486,41 @@ async function triggerSimulation() {
 3. **Thread, not asyncio** — for CPU-bound sync code (numpy, heavy loops), use `threading.Thread(daemon=True)`. For I/O-bound work, use `asyncio.create_task()`.
 4. **Frontend CSS transitions** — set `transition: width 0.3s ease` on the progress bar so it animates smoothly between poll intervals instead of jumping.
 5. **Job cleanup** — for in-memory `_jobs` dicts, add a TTL sweep (delete jobs older than 1 hour). For production, use Redis with expiry.
+6. **NEVER call a lock-taking helper from inside a lock-taking block.** `threading.Lock` is NOT
+   reentrant, so a `with _JOBS_LOCK:` block that calls a helper which also does
+   `with _JOBS_LOCK:` SELF-DEADLOCKS — and the request hangs while still holding the lock, so
+   every later status/progress call queues behind it forever. One hung POST takes the whole
+   progress route down for the life of the process.
+
+   **Split the helper**: a `_jobs_put_locked()` body that assumes the caller holds the lock, plus a
+   thin wrapper that takes it. Call the `_locked` form from inside a locked block.
+
+   ```python
+   def _jobs_put_locked(job_id, rec):      # caller already holds _JOBS_LOCK
+       _trim_registry()
+       _jobs[job_id] = rec
+
+   def _jobs_put(job_id, rec):             # safe to call OUTSIDE a locked block
+       with _JOBS_LOCK:
+           _jobs_put_locked(job_id, rec)
+   ```
+
+   **Diagnostic that identifies this in one call:** a route that hangs identically for a VALID and
+   an INVALID id is blocked BEFORE it can validate its input — so it is waiting on a lock, not
+   failing in its logic. Confirm by checking that an unrelated route which takes no lock still
+   answers, and that a freshly started process answers the hung route fine (nobody has POSTed to
+   deadlock it yet). Both together mean the lock, not the code path.
+7. **Set the client's poll bound from a MEASURED run, never from an estimate of the work.** A bound
+   below real latency is worse than no bound: the poll expires mid-job, the control drops its
+   local override, and the UI tells the user the result does not exist while it is still being
+   built — and they press Generate again. Measure the end-to-end time through the HTTP layer
+   (not a direct function call — the server path was 165s where the direct call was 100s), then
+   set the bound above it with headroom.
+8. **When a job is slower than you want, PARALLELISE it before widening the bound.** A wider bound
+   hides the problem. Per-item provider or API calls inside a loop are the usual culprit and are
+   independent by construction: submit them to a `ThreadPoolExecutor` instead of looping. Note the
+   server-side path can be meaningfully slower than the same function run directly, so re-measure
+   after the change rather than assuming the speedup carried over.
 
 ## In-Process Scheduled Jobs (APScheduler)
 
