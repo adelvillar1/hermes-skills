@@ -108,6 +108,33 @@ Need to run an LLM-powered batch job (hours, thousands of calls)?
 
 **Rule: loop the budget (4000 -> 8000 -> 16000) and retry on empty content, surfacing an error only after the largest budget also fails.** Empty content with `finish_reason=length` is a TOKEN-BUDGET signal, not a model failure or a parse failure — code that returns an error on the first empty response is what turns a recoverable budget problem into silent data loss. Never `max_tokens` smaller than ~4x your expected reasoning length for long structured outputs.
 
+**Measure the ceiling; do not pick a number (2026-09-22, resume rewriting).** The retry ladder only
+works if it can climb high enough, so the per-provider ceiling must be MEASURED rather than assumed.
+Probe it by sending a trivial prompt ("Reply READY") at ascending `max_tokens` values — the model
+stops early at `finish_reason=stop`, so probing is nearly free:
+
+| Provider | Measured ceiling | Rejection text |
+|----------|------------------|----------------|
+| Qwen `qwen3.8-flash` (token-plan) | **131,072** | `Range of max_tokens should be [1, 131072]` |
+| DeepSeek `deepseek-flash` | accepted 262,144 (no reject) | — |
+
+So the highest value safe for BOTH is 131,072. A concrete measured need on a real 30k-char rewrite
+prompt: **11,175 output tokens, of which 9,472 were reasoning** — i.e. the visible answer was only
+~15% of the budget. Setting 6,000 (below the reasoning cost) produced HTTP 200, empty content,
+`finish_reason='length'`, and no error of any kind.
+
+**A `max_tokens` cap is a runaway guard, not a rationing device.** Sizing it under the real
+requirement does not save anything — the call fails and you pay for the reasoning anyway — it just
+converts a working call into a silent empty one. Set it above the measured need, keep the escalation
+ladder for the tail, and never treat empty content as success.
+
+**Do not conflate the context window with the output cap.** A 1M-token context window governs how
+much the model can READ; `max_tokens` governs how much it can WRITE BACK. They are unrelated, and a
+large context window is not a licence to set a large output cap — nor a reason to set a small one.
+Both limits should be sized from measurement: the input from what the task actually needs to see
+(don't truncate a source corpus to a round number like 24,000 chars just because it feels big), the
+output from the measured reasoning cost plus headroom.
+
 **Token-plan 1-WEEK QUOTA exhaustion (2026-08-10, DesignCanvas — NEW failure mode):** the DeepSeek token-plan quota is per **1-week window**, not per-day. When exhausted, EVERY API call returns `HTTP 429: Your token-plan 1-week quota has been exhausted. The quota will reset at <ISO timestamp>`. Symptoms and implications:
 - Hits **mid-run**: subagents (`delegate_task` children) die after 3 retries (`API call failed after 3 retries: HTTP 429`), returning `exit_reason=max_iterations` with **no work product** — even long-running tasks die with their partial reads already done but their final summary missing. Budget for it: check quota before dispatching parallel subagent batches.
 - Hits the **parent too**: the parent's own tool-calling loop can be cut short by the same wall (observed: turns ended with `maximum number of tool-calling iterations allowed` right after the 429s started). The parent keeps answering (cached/queued context) while child calls fail.
