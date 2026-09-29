@@ -97,6 +97,36 @@ STAGING_PG_PASSWORD="$PW" python3 scripts/detect-schema-drift.py --cron
 
 Print only a confirmation like "creds extracted (pw hidden)". If extraction fails, check the field position (`awk -F'|'` numbering, surrounding backticks) — do NOT fall back to grep/sed line iteration over the file: **bulk line-scanning a secrets file echoes the whole file to the terminal** (one session printed ~26k chars of live credentials that way).
 
+## Keyword scanning does not find credentials
+
+Preparing a full project archive, a regex sweep for `sk-…`, `AIza…`, `Bearer …` and `API_KEY=…`
+reported **zero hits** — and the archive still contained a live `auth.json` holding a
+**1,814-character `access_token` and a 67-character `refresh_token`**, nested under a
+`credential_pool` key. No keyword pattern matched, because a token is not a keyword: it is an opaque
+string.
+
+**Credentials live in credential stores, and every tool has one.** Before shipping any archive,
+backup, or bundle, exclude them by NAME — `auth.json`, `auth.lock`, `credential*`, `*token*.json`,
+`config.yaml`, `profile.yaml`, `.netrc`, `.npmrc`, `.pypirc`, `.docker/config.json`, `*.pem`,
+`*.key`, `.git/config`. Do not rely on content matching to catch them.
+
+**Sweep for shape, not only keywords.** A string longer than ~80 characters with no space, standing
+alone inside quotes, is credential-shaped:
+
+```python
+OPAQUE = re.compile(r"['\"]([A-Za-z0-9_\-+/=]{80,})['\"]")
+```
+
+**Scan the FINISHED archive, not the source directory.** Reading the built artifact is the only way
+to prove what actually shipped. Re-run the audit after every change to the exclusion list — an audit
+that passes *because* a file was excluded is only valid while the exclusion is still in place.
+
+**A source tree is not a project.** A working/profile directory accumulates the harness's own
+runtime — virtualenvs, session stores, caches, sandboxes, binaries, shared skill libraries. For one
+project these outweighed the project itself (162 MB venv + 38 MB binary against 121 MB of real
+content). Decide the boundary from evidence — file counts and bytes per directory — instead of
+archiving a working directory wholesale.
+
 ## Pitfalls
 
 - **Never echo secret values into tool output.** Redact with `re.sub(..., '[REDACTED]', line)` before any print; a migration script that prints raw lines leaks the secret into the transcript you're trying to protect.
