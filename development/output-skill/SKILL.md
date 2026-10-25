@@ -1,7 +1,7 @@
 ---
 name: output-skill
 description: "Enforce full AI output; ban placeholders, lazy truncation."
-version: 1.0.0
+version: 1.1.0
 author: Derived from taste-skill (Leonxlnx, MIT)
 license: MIT
 metadata:
@@ -47,6 +47,12 @@ When a response approaches the token limit:
 ```
 
 On "continue", pick up exactly where you stopped. No recap, no repetition.
+
+## Delivery Channel
+
+- When handing this user source files or documents, paste the content inline as code blocks, splitting long batches across replies at clean breakpoints — path-based file cards have failed for this user with "file not found", so a card is not a delivery.
+- When pasting file content, transcribe verbatim from disk and state any transcription deviation explicitly — an unflagged re-typing error reads as a bug in their source.
+- Do not summarize a file the user asked to "output" — show the real content or nothing; paraphrase is not delivery.
 
 ## Quick Check
 
