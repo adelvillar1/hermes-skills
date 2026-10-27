@@ -66,19 +66,31 @@ git diff origin/<base>...origin/<head> -- path/to/file
 # Read full files at the PR head — diffs alone miss context
 git show origin/<head>:path/to/file
 
-# Run the PR's NEW tests: extract only new files into the working
-# tree, run the runner, then remove them and confirm clean.
-git show origin/<head>:apps/api/src/routes/foo.ts > apps/api/src/routes/foo.ts
-git show origin/<head>:apps/api/src/routes/foo.test.ts > apps/api/src/routes/foo.test.ts
-npx vitest run apps/api/src/routes/foo.test.ts
-rm apps/api/src/routes/foo.ts apps/api/src/routes/foo.test.ts
-git status --short    # MUST be back to pre-review state
+# Run the PR's NEW tests — materialise in a SCRATCH tree, never the shared clone.
+# Writing PR files into a shared clone dirties state other sessions read and makes
+# this run's own `git status` check meaningless; the residue then gets blamed on
+# "a concurrent session" that never existed.
+SCRATCH=/opt/data/cache/scratch/pr-review-$(date +%s); mkdir -p "$SCRATCH"
+git archive origin/<head> | tar -x -C "$SCRATCH"     # PR tree, no .git, clone untouched
+ln -s "$PWD/node_modules" "$SCRATCH/node_modules"    # reuse installed deps
+cd "$SCRATCH" && npx vitest run apps/api/src/routes/foo.test.ts
+cd -; git status --short                             # shared clone MUST still be empty
 ```
 
 Limitations:
 - Works cleanly only when the PR **adds** files. If it modifies existing files, extraction would dirty shared source — verify via CI or ask the user instead.
 - Test extraction works when imports resolve against unchanged files (e.g. a new route + its test importing existing helpers). Verify imports exist on the base branch first (`grep` the symbol).
 - Vitest/jest runners use esbuild — passing tests do **not** prove typecheck. Note typecheck as unverified unless you ran `tsc`.
+
+## Verify status claims by measurement, not by framing
+
+A pre-flight or review report states status; the reader needs the numbers behind it. These five checks are what turn a confident sentence into a verifiable one — commands and interpretation table in `references/ref-arithmetic.md`.
+
+- **Staleness is a count, not a claim.** A head that carries `Merge origin/<base> … (refresh #N)` is *not* current. Quote `git rev-list --count origin/<base> --not origin/<head>` plus the head commit's date. A refresh freezes the gap; it does not close it.
+- **Merge order comes from code, not from merge-tree.** Two PRs can merge cleanly in either order and still have a runtime dependency. Grep the sibling head for a shim that names the other PR ("added on the still-open T5 PR, unmerged") and quote it. A clean `git merge-tree --write-tree` proves textual compatibility only — say so before recommending an order.
+- **Containment has direction.** `git rev-list --left-right --count A...B` prints LEFT=A-only / RIGHT=B-only. RIGHT=0 means B fully contains A: report *promoted*, never "behind". Before alleging a rewrite from any asymmetry, re-run with `--no-merges` and name the pattern — a `--no-ff` release flow permanently leaves main carrying merges the lane below lacks.
+- **An ancestry gap is not a content gap.** A commit absent from a branch by SHA may be present by content, because a cherry-pick or rebase creates a duplicate. Compare `git show <sha> | git patch-id --stable` and the blobs of the files it touched (`git rev-parse <ref>:<path>`) before calling anything "missing", and never recommend merging a lane back to "close" such a gap — it is ancestry churn.
+- **Test counts are expanded counts.** `grep -c 'it('` counts blocks, but `it.each(table)` expands at runtime; check for `it.each`/`test.each` before disputing a PR's test total.
 
 ## Check the PR against its own plan
 
@@ -94,3 +106,6 @@ Merge only through GitHub (`gh pr merge <N> --merge` or web UI) so CI and deploy
 2. **`gh pr checks` failing ≠ CI failing** — distinguish token-scope 403s from real check failures before reporting "CI red" or "no CI".
 3. **Extraction review left dirty tree** — always end with `git status --short` and confirm you restored the pre-review state.
 4. **Trusting "excluded from canonical suite" claims** — when the PR body blames a pre-existing test failure, confirm it fails on the base branch too before excusing it.
+5. **Residue in the shared clone** — extract to a scratch tree (see above); a review that dirties the clone it is reviewing cannot honestly report a clean tree, and its own writes look like someone else's leftovers.
+6. **Reading a deploy status from a retired platform** — commit-status contexts keep reporting the platform that posted them. When a repo migrates deploy providers, old-context `success` is not evidence the new platform deployed. Read the current deploy section of the repo's own docs before calling a merge deployed, and label any legacy-context claim as ambiguous.
+7. **Quoting a remembered number as current** — indexes, counts, and heads move. Re-measure the fact in the run that reports it; a pinned value needs a date and a re-measure instruction, or it becomes a standing falsehood.
