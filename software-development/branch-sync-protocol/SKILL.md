@@ -225,6 +225,8 @@ psql "$DATABASE_URL" -At -c "SELECT column_name FROM information_schema.columns 
 
 When a fix lands on `main` (or `staging`) before `develop`, do NOT merge production into develop — that's backwards per the branch topology (`develop → staging → main`). Instead, cherry-pick individual commits:
 
+**First check whether the commit is actually missing.** Cherry-picks and rebases put the same change on two lanes under different SHAs, so an ancestry gap is routinely not a content gap: compare `git patch-id --stable` and the blob SHAs of the touched files before declaring work missing, and never "close" such a gap by merging the lane backwards. Full command set and the other counting traps (units, `--no-merges`, pipe-lines vs data rows, equal trees ≠ equal SHAs) are in `references/divergence-measurement.md`.
+
 ```bash
 # 1. See what's on main but not develop
 git log --oneline develop..main
@@ -295,3 +297,4 @@ All three are required warmup checks per CLAUDE.md hard rules. If any reports dr
 - `scripts/detect-branch-drift.sh` — automated drift detection, run at every warmup
 - `scripts/detect-schema-drift.py` — Prisma/PG schema drift detection
 - `references/production-sync-pitfalls.md` — sync-to-production workflow: run from staging, data verification, BYTEA handling, migration record cleanup
+- `references/divergence-measurement.md` — how to compare branches without lying: ancestry vs content, patch-id/blobs, `--no-merges`, units and table-row counts, containment checks
