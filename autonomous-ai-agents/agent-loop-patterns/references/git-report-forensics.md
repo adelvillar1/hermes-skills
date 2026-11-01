@@ -32,6 +32,23 @@ git rev-parse <ref>:<path>                        # and compare blobs of the fil
 - The inverse also matters: a commit can exist on the deploy lanes and not on the work branch while its
   content is on all three. Say "SHA absent, content present" — do not let one phrase stand for the other.
 
+## Is a path actually absent?
+
+"Absent from <lane>" is an existence claim, so prove existence before absence:
+
+```bash
+git cat-file -e <lane>:<path> && echo present || echo absent
+git rev-parse <lane>:<path>                   # blob id, when present
+```
+
+- A file that exists with a **different blob** is an **outdated revision**, not absent content: the lane
+  carries an older version of it. Calling it ABSENT sends the reader hunting for a missing file that is
+  sitting right there — and it turns a routine pending update into a phantom work-loss finding.
+- A `git diff --stat` line proves the trees differ, not that either side lacks the path. Never convert a
+  diff summary into an absence claim.
+- Test the file, not the folder: a directory can exist and hold only subdirectories but no manifest
+  (`skills/<name>/` present, `skills/<name>/SKILL.md` missing), so a directory listing is not existence.
+
 ## Markdown / index counts
 
 - Data rows = lines matching `^|` **minus header and separator** when the table has both. State the rule
@@ -55,6 +72,11 @@ git rev-parse <ref>:<path>                        # and compare blobs of the fil
   live at <time>" — instead of borrowing an old platform's green.
 - Docs naming a public URL are not proof the URL serves: verify the host, and compare it with the app's
   own allowlist (CORS origins often record the real origin).
+- A migration rewrites the section it was aimed at, not the whole document: after a platform move, sweep
+  for the old platform's name (`git grep -n -i <old-platform> <ref>`) and report the surviving mentions.
+  Service descriptions, env-var notes and "not provisioned on X" asides typically still point at the
+  retired platform even when the deploy section reads correctly — and a mention that already says
+  "legacy" is accurate, so classify rather than bulk-flag.
 
 ## Test gates
 
