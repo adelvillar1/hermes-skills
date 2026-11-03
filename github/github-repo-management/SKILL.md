@@ -274,6 +274,42 @@ curl -s -X PUT \
   -d '{"names": ["machine-learning", "python", "automation"]}'
 ```
 
+## A repo's docs go stale the moment its visibility changes
+
+Fix the LIVING docs; leave the DATED records. When a repo is open-sourced (or made private), grep the
+tracked markdown for the old claim — `private`, `MIT-licensed; the repo is private`, a remote that no
+longer applies — and split what you find:
+
+- **Living docs** (`README.md`, `CLAUDE.md`, `AGENTS.md`, contributor guides) **are wrong now — fix them.**
+  A flagship public repo whose README says "the repo is private" argues against its own open-sourcing.
+- **Dated records** (`docs/plans/YYYY-MM-DD-*`, `docs/recaps/YYYY-MM-DD-*`, changelogs) **were accurate
+  when written — leave them.** Editing a dated record falsifies history to fix a cosmetic mismatch.
+
+Check the status/version line at the same time: a visibility change often accompanies a status change,
+and `Cargo.toml` / `package.json` / `pyproject.toml` is the authority — never the README's prose.
+
+## The owner cannot see dead links on their own profile
+
+A GitHub profile README linking to **private** repos renders perfectly for its author — authenticated,
+able to open every one — and returns **404 for every visitor**. The author is the least able person to
+notice.
+
+Test from the outside: `curl -s -o /dev/null -w '%{http_code}' -L <url>` for every link, treating the
+author's own view as unrepresentative. Measured on one real profile: **6 of 8 links dead** — five
+private repos plus one relative link that was not a URL at all. Apply the same test to links added to a
+resume or a generated document: a private repo is never a citable artifact. Prefer the **live product
+URL** over the repo link — a working site is citable no matter who can read the code.
+
+A profile README's reading order matters as much as its links: check what fraction of the page precedes
+the portfolio (one measured profile spent 89% of its length on a single product before mentioning the
+others).
+
+## Kill the sample-app README
+
+A repo whose README is the framework's own boilerplate (`create-next-app`, `npm init` output) reads as an
+unmodified tutorial, whatever the GitHub *description* says. The description also drives search results
+and the repo card — an empty one wastes the only text most visitors read.
+
 ## 6. Branch Protection
 
 ```bash

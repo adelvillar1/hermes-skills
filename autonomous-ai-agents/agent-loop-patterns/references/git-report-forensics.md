@@ -58,7 +58,9 @@ git rev-parse <lane>:<path>                   # blob id, when present
   standing falsehood the moment the subject changes; pin the *command*, date any remembered value, and
   mark it historical.
 - A row can contradict the branch it lives on (status says "uncommitted" while the commits exist). Quote
-  the row, then check the branch history before repeating it.
+  the row, then check the branch history before repeating it. Never extend the cell into an inference it
+  does not support: "uncommitted" is a claim about the row's own moment, not evidence that no branch
+  carries the work — prove that with `git log` and `git ls-tree` on the branch that would carry it.
 
 ## Deploy status
 
@@ -76,7 +78,10 @@ git rev-parse <lane>:<path>                   # blob id, when present
   for the old platform's name (`git grep -n -i <old-platform> <ref>`) and report the surviving mentions.
   Service descriptions, env-var notes and "not provisioned on X" asides typically still point at the
   retired platform even when the deploy section reads correctly — and a mention that already says
-  "legacy" is accurate, so classify rather than bulk-flag.
+  "legacy" is accurate, so classify rather than bulk-flag. Include code, not just docs: a fallback default
+  (`process.env.API_URL ?? "http://api.<old>.internal"`) still works only while the env var is set, and with
+  it unset the process resolves a hostname that does not exist on the new platform — report that as a latent
+  break with the line reference, not as cosmetic drift.
 
 ## Test gates
 
