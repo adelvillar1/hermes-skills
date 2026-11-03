@@ -912,6 +912,27 @@ run — "prove the pipeline on a small sample, print one complete output for rev
 THE EXACT COMMAND for the full run; the parent executes it as a background process." A child that
 cannot start a long job cannot block on one.
 
+## Pitfall 21 — An EMPTY `output_schema` is not "no schema": it mangles a correct report
+
+**The trap:** the parent passes `output_schema: {}` meaning "no schema — answer in prose". The child
+reads the mere PRESENCE of an `output_schema` key as a format requirement and forces its findings
+into JSON, inventing a shape on the fly. When the content does not fit that invented shape, the result
+is spliced prose, escaped fragments and duplicated keys — so the parent receives a malformed summary
+from a run that actually succeeded, and may conclude the review or implementation failed. Observed: a
+child emitted a complete, correct report, then re-emitted it three minutes later as broken JSON;
+its own note blamed the empty schema.
+
+**Rule:** OMIT `output_schema` entirely when you do not want structured output. Never pass `{}` — it is
+a malformed requirement, not an absence of one. Declare a schema only when you will index the result
+programmatically, and keep it forgiving: require the two or three keys you actually read, never the
+whole report (extra fields then cost a retry cycle for nothing).
+
+**Recovery when a summary arrives garbled but the task plainly ran:** do not re-dispatch. Read the live
+transcript (`.../delegation/live/<id>/task-N.log`) — a child that garbled its FINAL message almost
+always wrote the good version earlier in the same run, and that copy is the deliverable. Re-derive any
+figures you need from the artifact on disk rather than from either copy of the prose, so the report
+you act on is measured rather than quoted.
+
 ## Overlap note (for the curator)
 
 Pitfalls 1–2 overlap with `subagent-driven-development`'s existing timeout/quota guidance

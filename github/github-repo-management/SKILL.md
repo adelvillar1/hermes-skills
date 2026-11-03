@@ -310,6 +310,25 @@ A repo whose README is the framework's own boilerplate (`create-next-app`, `npm 
 unmodified tutorial, whatever the GitHub *description* says. The description also drives search results
 and the repo card — an empty one wastes the only text most visitors read.
 
+### Rebuild a long README by BLOCK, and prove nothing was dropped
+
+Restructuring a long document by hand loses detail silently — the technical prose is what makes a
+profile worth reading, and retyping it is how paragraphs quietly disappear. Split the source at
+heading boundaries into blocks, reassemble by **reference to those parsed blocks**, and hand-write only
+the genuinely new sections. `reproduce with modifications`, never retype.
+
+Then verify preservation mechanically: for every block in the ORIGINAL, assert that its heading is
+present in the new file **and** that its body text is present. Read that result — it is what catches a
+block that was defined but never used.
+
+The failure mode is subtle enough to warrant the check: writing a literal heading string in the
+assembly instead of the parsed block variable drops that section's entire **body** while the heading
+still renders, so any check that only looks for headings reports success. One section silently went
+from 1,406 chars to its heading alone this way.
+
+Report the before/after reading order as a character offset as well (`portfolio now at char 789, was
+13,200`) — a reorder nobody measured is a reorder you cannot claim.
+
 ## 6. Branch Protection
 
 ```bash
