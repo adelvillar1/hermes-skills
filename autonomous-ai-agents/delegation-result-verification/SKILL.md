@@ -933,6 +933,44 @@ always wrote the good version earlier in the same run, and that copy is the deli
 figures you need from the artifact on disk rather than from either copy of the prose, so the report
 you act on is measured rather than quoted.
 
+## Pitfall 22 — The pilot passed because it took a different road than production
+
+**The trap:** a change is piloted over N records, the pilot is clean, and production is broken anyway —
+because the pilot entered through a DIFFERENT ENTRY POINT than the live path. Both call the same shared
+function, but each hands it a different INPUT SHAPE, so the shared function classifies the same entity
+two ways. The pilot's green result is evidence about the pilot's path, and nothing else.
+
+Observed shape: a trimming step built a reduced dict (five fields) for the resume builder while the
+cover-letter path passed the full row, and the shared selector preferred a field present only in the
+full row. The same posting classified one way for the resume and another way for its own cover letter.
+The pilot took a third path that passed the full row, so it never saw the defect — which lived ONLY in
+the live writer. A spec-compliance review passed too: the block was present, correct-sized and
+correctly placed in every piloted document.
+
+**Rules:**
+
+- **A pilot is evidence about the path it ran.** Before trusting one, confirm the pilot and the
+  production path reach the shared code the same way. If they differ, re-run the pilot through the
+  production entry point — or say plainly that production is unverified.
+- **When one entity produces two artifacts, both call sites must pass the same shape.** Hand-building a
+  trimmed dict at one call site is how they silently diverge; pass the row, or build the reduced shape
+  in one shared place.
+- **Prove divergence by running both inputs through the function and printing both results** — not by
+  re-reading the finding. One line contrasting `old input -> ('product', keyword path)` with
+  `full row -> ('portfolio', verdict path)` settles it; agreement about the code in prose does not.
+
+**A reviewer you cannot dismiss because it could not run anything:** one that states "source reading
+only — dynamic execution was blocked" has declared its evidentiary basis, which is more useful than a
+confident review that hides one. Static reading finds this class — divergent inputs, dead guards,
+swallowed exceptions — better than a green pilot does, because the defect is in the code path rather
+than in the data. Confirm each HIGH finding from source before patching, and expect a confirmed finding
+to be WORSE than described: the reviewer can see the code but not necessarily which path production
+takes.
+
+**Recovery when a review lands on unreviewed code you were about to promote:** fix the HIGH findings
+first and re-run the pilot to confirm selections are unchanged, then promote. Promoting first and
+patching after writes the defect into every generated artifact, where it cannot be recalled.
+
 ## Overlap note (for the curator)
 
 Pitfalls 1–2 overlap with `subagent-driven-development`'s existing timeout/quota guidance
