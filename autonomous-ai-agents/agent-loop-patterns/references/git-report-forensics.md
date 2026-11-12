@@ -82,6 +82,10 @@ git rev-parse <lane>:<path>                   # blob id, when present
   (`process.env.API_URL ?? "http://api.<old>.internal"`) still works only while the env var is set, and with
   it unset the process resolves a hostname that does not exist on the new platform — report that as a latent
   break with the line reference, not as cosmetic drift.
+- A raw sweep count is not a work estimate. Most hits in a repo-wide grep are historical records
+  (`docs/plans/`, `docs/recaps/`, evidence snapshots) that would be falsified by editing them. Split the
+  number before quoting it — e.g. `git grep -c -i <term> <ref> -- ':!docs/plans/*' ':!docs/recaps/*'` —
+  and report "N refs total, M on the live surface" so the reader knows the size of the actual task.
 
 ## Test gates
 
@@ -91,6 +95,11 @@ git rev-parse <lane>:<path>                   # blob id, when present
   scratch checkouts. Identical cached durations across two copies are not evidence that both suites ran.
   Re-run in the copy that holds the code under test and quote the runner's own pass count.
 - Treat self-reported gate numbers as unverified until reproduced, and say which you did.
+- A **combined** total needs one runner invocation over one tree holding every change under test. Running
+  each file separately and adding the counts is not a combined run, and it silently drops cross-file
+  failures: a tree with both PRs' test files but without the sibling PR's harness change reported
+  106/108 (two join-dependent tests 500) where the report claimed 108/108. Quote the tree path beside the
+  number, and when a run is red name the failing tests and the mechanism — never round it into a pass.
 
 ## Before contradicting a report
 

@@ -53,6 +53,12 @@ When assembling a large V4A patch, the text you *generate* (not the target's con
 
 **Rule:** after any patch whose new_string contains fenced code, generated placeholders, or patch-format lines, (1) run the file's syntax check (`read_file` back through the edited region, or the language's compiler), and (2) `search_files` for leftover terminator tokens (`*** End Patch`, `@@`, `===`) AND for generated placeholder names (`placeholder`, `TODO`, `pass  # ...`) inside the target file — expect zero matches.
 
+## Pitfall 6 — a trailing newline in old_string joins the next line
+
+Line breaks belong to the text being replaced. If `old_string` ends with `\n` (or with a whole line including its break) and `new_string` does not reproduce that break, the following line is glued onto your replacement: replacing `HORIZON_DAYS = 14\n` with `HORIZON_DAYS = 14` plus new content produced `HORIZON_DAYS = 14MAX_DAYS_REPORTED = 5`, which only surfaced because a syntax check ran immediately afterwards.
+
+**Rule:** match whole lines and re-emit the newline (`old_string` and `new_string` both end with `\n`, or neither includes one); never let a replacement end mid-line above content that must stay on its own line. After touching a block of adjacent assignments/imports/table rows, run the file's parse check (`python3 -c "import ast;ast.parse(open(p).read())"`, a linter, or a re-read of the edited lines) before any further edit — a joined line is valid-looking text and a silent `key = value1value2` corrupts behaviour rather than failing loudly.
+
 ## Mandatory verification steps
 
 1. **Read the patch tool's returned diff** — don't just note `success: true`. Check the `+` lines are exactly what you intended, with correct leading characters.
